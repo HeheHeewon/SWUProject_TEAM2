@@ -1,0 +1,10 @@
+.venv/
+venv/
+
+.env
+db.sqlite3
+__pycache__/
+*.pyc
+
+# Django collectstatic 결과(나중에)
+staticfiles/
