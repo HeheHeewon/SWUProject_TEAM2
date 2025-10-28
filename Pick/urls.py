@@ -20,4 +20,5 @@ from django.urls import path,include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),  # accounts/urls.py가 있어야 함
+    path("posts/", include('posts.urls', namespace="posts")),
 ]
