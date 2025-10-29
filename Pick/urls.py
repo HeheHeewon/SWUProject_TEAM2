@@ -16,9 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.contrib.auth import views as auth_views   # 해당 줄 추가
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),  # accounts/urls.py가 있어야 함
+
+    # ✅ 커스텀 템플릿을 쓰는 로그인
+    path("accounts/login/",
+         auth_views.LoginView.as_view(template_name="accounts/login.html"),
+         name="login"),
+
+    path("accounts/", include("django.contrib.auth.urls")),  # ✅ 기본 로그인/로그아웃/비번변경/재설정
+    # path('accounts/', include('accounts.urls')),  # accounts/urls.py가 있어야 함
     path("posts/", include('posts.urls', namespace="posts")),
 ]

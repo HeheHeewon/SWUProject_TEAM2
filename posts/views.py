@@ -1,26 +1,23 @@
 # posts/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.urls import reverse_lazy, reverse             # ✅ reverse 추가
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
 from .forms import DemandForm, SupplyForm
-# 거리 계산 제거: from common.geo import haversine_km  # ← 사용 안 함
 
 class PostListView(ListView):
     model = Post
     template_name = "posts/list.html"
-    paginate_by = 20
+    paginate_by = 20  # ✅ 주석으로
 
     def get_queryset(self):
         qs = super().get_queryset()
         q = self.request.GET
 
-        # type 필터(수요/공급)
         t = q.get("type")
         if t in (Post.Type.DEMAND, Post.Type.SUPPLY):
             qs = qs.filter(type=t)
 
-        # 수요글 필터
         if (u := q.get("usage")):
             qs = qs.filter(usage=u)
         if (d := q.get("dry")) in ("true", "false"):
@@ -29,9 +26,6 @@ class PostListView(ListView):
             qs = qs.filter(package=p)
         if (pt := q.get("price_type")):
             qs = qs.filter(price_type=pt)
-
-        # 거리 필터는 사용하지 않음
-        # withinKm, lat, lng 파라미터는 무시합니다.
 
         return qs
 
@@ -43,6 +37,7 @@ class DemandCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = DemandForm
     template_name = "posts/new_demand.html"
+    # 상세로 보내고 싶으면 get_success_url로 통일해도 됨
     success_url = reverse_lazy("posts:list")
 
     def form_valid(self, form):
@@ -65,14 +60,27 @@ class AuthorOnlyMixin(UserPassesTestMixin):
     def test_func(self):
         return self.get_object().author_id == self.request.user.id
 
+# ✅ UpdateView는 상세로 리다이렉트
 class DemandUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     model = Post
     form_class = DemandForm
     template_name = "posts/edit_demand.html"
-    success_url = reverse_lazy("posts:list")
+    def get_success_url(self):
+        return reverse("posts:detail", args=[self.object.pk])
 
 class SupplyUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     model = Post
     form_class = SupplyForm
     template_name = "posts/edit_supply.html"
+    def get_success_url(self):
+        return reverse("posts:detail", args=[self.object.pk])
+
+class DemandDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
+    model = Post
+    template_name = "posts/confirm_delete.html"
+    success_url = reverse_lazy("posts:list")
+
+class SupplyDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
+    model = Post
+    template_name = "posts/confirm_delete.html"
     success_url = reverse_lazy("posts:list")

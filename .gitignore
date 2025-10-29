@@ -6,5 +6,8 @@ db.sqlite3
 __pycache__/
 *.pyc
 
+# 사용자 업로드
+media/
+
 # Django collectstatic 결과(나중에)
 staticfiles/
