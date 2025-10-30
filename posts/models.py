@@ -10,6 +10,10 @@ class Post(models.Model):
     class Usage(models.TextChoices):
         COMPOST = "퇴비", "퇴비용"
         CRAFT   = "공예", "공예용"
+        GARDEN  = "원예", "원예용"
+        RESEARCH = "연구/실험", "연구/실험"
+        ETC = "기타", "기타"
+
     class Package(models.TextChoices):
         HAS  = "있음", "포장 있음"
         NONE = "없음", "포장 없음"
@@ -29,7 +33,12 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # 수요 전용
-    usage   = models.CharField(max_length=2, choices=Usage.choices, null=True, blank=True)
+    usage   = models.CharField(
+        max_length=20,               # ✅ 2 → 20로 확장
+        choices=Usage.choices,
+        null=True,
+        blank=True,
+    )
     dry     = models.BooleanField(null=True, blank=True)
     package = models.CharField(max_length=2, choices=Package.choices, null=True, blank=True)
 
