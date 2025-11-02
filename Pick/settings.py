@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'cart',
 ]
 
 MIDDLEWARE = [
@@ -123,3 +124,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Pick/settings.py에 추가
+
+# 회원가입 성공 후 리다이렉트될 URL (로그인 페이지로 설정)
+LOGIN_URL = '/accounts/login/'
+
+# 로그인 성공 후 리다이렉트될 URL (마이페이지로 설정)
+LOGIN_REDIRECT_URL = '/accounts/mypage/'
+
+# 로그아웃 후 리다이렉트될 URL (선택 사항, 홈이나 로그인 페이지로 설정)
+LOGOUT_REDIRECT_URL = '/accounts/login/'

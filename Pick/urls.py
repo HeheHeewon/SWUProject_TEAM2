@@ -19,5 +19,6 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),  # accounts/urls.py가 있어야 함
+    path('accounts/', include('accounts.urls')),
+    path('cart/', include('cart.urls')),  # accounts/urls.py가 있어야 함
 ]
