@@ -1,5 +1,6 @@
 {# templates/posts/detail.html #}
 {% extends "base.html" %}
+{% load humanize %}   {# ← 추가 #}
 {% block title %}{{ object.title }}{% endblock %}
 
 {% block content %}
@@ -14,42 +15,58 @@
 
     {# 공통 정보 #}
     <dl class="row">
-      <dt class="col-sm-2">가격</dt>
+      <dt class="col-sm-2">거래 장소</dt>
       <dd class="col-sm-10">
-        {{ object.price_type }}
-        {% if object.price_type == "유료" and object.price %} / {{ object.price }}원{% endif %}
+        {% if object.place_name %}{{ object.place_name }}
+        {% elif object.address %}{{ object.address }}
+        {% else %}-{% endif %}
       </dd>
 
-      <dt class="col-sm-2">위치</dt>
-      <dd class="col-sm-10">lat: {{ object.lat }}, lng: {{ object.lng }}</dd>
-
       {% if object.conditions %}
-      <dt class="col-sm-2">거래 조건</dt>
+      <dt class="col-sm-2">거래/수거 조건</dt>
       <dd class="col-sm-10">{{ object.conditions }}</dd>
       {% endif %}
     </dl>
 
-    {# 타입별(수요/공급) 전용 정보 #}
+    {# 타입별 상세 #}
     {% if object.type == 'DEMAND' %}
       <h2 class="h6 mt-4">수요 상세</h2>
       <dl class="row">
+        <dt class="col-sm-2">지불 의사</dt>
+        <dd class="col-sm-10">
+          {{ object.demand_price_pref|default:"-" }}
+          {% if object.demand_price_pref == "유료" and object.max_budget %}
+            · 최대 {{ object.max_budget|intcomma }}원
+          {% endif %}
+        </dd>
+
         <dt class="col-sm-2">용도</dt>
-        <dd class="col-sm-10">{{ object.usage }}</dd>
+        <dd class="col-sm-10">{{ object.usage|default:"-" }}</dd>
 
         <dt class="col-sm-2">건조</dt>
         <dd class="col-sm-10">
-          {% if object.dry == True %}유{% elif object.dry == False %}무{% else %}-{% endif %}
+          {% if object.dry == True %}건조됨{% elif object.dry == False %}건조 안 됨{% else %}-{% endif %}
         </dd>
 
         <dt class="col-sm-2">포장</dt>
         <dd class="col-sm-10">{{ object.package|default:"-" }}</dd>
+
+        <dt class="col-sm-2">거리 선호</dt>
+        <dd class="col-sm-10">{{ object.within_5km|yesno:"5km 이내만,5km 제한 없음" }}</dd>
       </dl>
     {% else %}
       <h2 class="h6 mt-4">공급 상세</h2>
       <dl class="row">
-        <dt class="col-sm-2">수량</dt>
+        <dt class="col-sm-2">가격</dt>
+        <dd class="col-sm-10">
+          {{ object.price_type }}
+          {% if object.price_type == "유료" and object.price %}
+            / {{ object.price|intcomma }}원
+          {% endif %}
+        </dd>
+
+        <dt class="col-sm-2">수량/단위</dt>
         <dd class="col-sm-10">{{ object.amount|default:"-" }}</dd>
-        {# 공급에 건조 여부를 쓰려면 models/forms에 dry를 포함하도록 바꿔두세요. #}
       </dl>
     {% endif %}
 
@@ -60,7 +77,7 @@
 
     <hr class="my-4">
 
-    {# ✅ 작성자 본인에게만 수정/삭제 버튼 노출 #}
+    {# 본인만 수정/삭제 #}
     {% if request.user.is_authenticated and request.user.id == object.author_id %}
       {% if object.type == 'DEMAND' %}
         <a class="btn btn-outline-primary" href="{% url 'posts:demand_edit' object.pk %}">수정</a>

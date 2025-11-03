@@ -1,26 +1,27 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Profile
 
-<<<<<<< HEAD
-# Profile 모델을 User 관리자 페이지에 함께 보여주기 위한 설정
+User = get_user_model()
+
 class ProfileInline(admin.StackedInline):
-    model = Profile
+    model = Profile           # Profile 모델에 user = OneToOneField(settings.AUTH_USER_MODEL, ...) 있어야 함
+    fk_name = "user"          # Profile.user 필드명
     can_delete = False
-    verbose_name_plural = 'profile'
+    extra = 0
+    verbose_name_plural = "profile"
 
-# 기존 UserAdmin을 확장하여 Profile을 추가
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    inlines = (ProfileInline,)
+    inlines = [ProfileInline]  # Profile 없으면 이 줄 제거
 
-# 기존 UserAdmin 등록 해제 후 새로운 UserAdmin 등록
-admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
-=======
-#화면 구현 테스트용
-
-from django.contrib import admin
-from .models import User
-admin.site.register(User)
->>>>>>> TRY1
+    fieldsets = BaseUserAdmin.fieldsets + (
+        ("추가 정보", {"fields": ("nickname", "lat", "lng")}),
+    )
+    add_fieldsets = BaseUserAdmin.add_fieldsets + (
+        (None, {"fields": ("nickname", "lat", "lng")}),
+    )
+    list_display = ("id", "username", "nickname", "email", "is_staff", "is_superuser")
+    search_fields = ("username", "nickname", "email")

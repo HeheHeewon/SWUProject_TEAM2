@@ -20,10 +20,13 @@ class PostListView(ListView):
 
         if (u := q.get("usage")):
             qs = qs.filter(usage=u)
+
         if (d := q.get("dry")) in ("true", "false"):
             qs = qs.filter(dry=(d == "true"))
+
         if (p := q.get("package")):
             qs = qs.filter(package=p)
+
         if (pt := q.get("price_type")):
             qs = qs.filter(price_type=pt)
 
@@ -43,6 +46,11 @@ class DemandCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.type = Post.Type.DEMAND
         form.instance.author = self.request.user
+        # 수요글: 실제 거래가 금지 -> 확실히 None
+        form.instance.price = None
+        # 수요글: 사용자가 고른 지불 의사(demand_price_pref)를 모델의 price_type에도 반영
+        # (price_type 필드가 공통 필수이므로 일관성 보장)
+        form.instance.price_type = form.instance.demand_price_pref
         return super().form_valid(form)
 
 class SupplyCreateView(LoginRequiredMixin, CreateView):
@@ -65,6 +73,14 @@ class DemandUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     model = Post
     form_class = DemandForm
     template_name = "posts/edit_demand.html"
+
+    def form_valid(self, form):
+        # 업데이트 시에도 동일한 규칙 유지
+        form.instance.type = Post.Type.DEMAND
+        form.instance.price = None
+        form.instance.price_type = form.instance.demand_price_pref
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse("posts:detail", args=[self.object.pk])
 
@@ -72,6 +88,11 @@ class SupplyUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     model = Post
     form_class = SupplyForm
     template_name = "posts/edit_supply.html"
+
+    def form_valid(self, form):
+        form.instance.type = Post.Type.SUPPLY
+        return super().form_valid(form)
+
     def get_success_url(self):
         return reverse("posts:detail", args=[self.object.pk])
 

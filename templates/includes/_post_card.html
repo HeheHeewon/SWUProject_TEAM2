@@ -1,41 +1,46 @@
 {# templates/includes/_post_card.html #}
-<div class="card position-relative h-100 shadow-sm">  {# ✅ position-relative: stretched-link용 #}
+{% load humanize %}
+<div class="card h-100 shadow-sm">
   <div class="card-body">
-    <div class="d-flex justify-content-between mb-2">
-      <span class="badge {% if post.type == 'DEMAND' %}bg-success{% else %}bg-primary{% endif %}">
+    <div class="d-flex align-items-center gap-2 mb-2">
+      <span class="badge {% if post.type == 'SUPPLY' %}text-bg-primary{% else %}text-bg-success{% endif %}">
         {{ post.get_type_display }}
       </span>
-      <small class="text-muted">{{ post.created_at|date:"Y.m.d H:i" }}</small>
-    </div>
-
-    <h2 class="h6 mb-2">
-      {# ✅ 제목을 상세 링크로, stretched-link로 카드 전체 클릭처럼 #}
-      <a href="{% url 'posts:detail' post.pk %}" class="stretched-link text-decoration-none">
-        {{ post.title }}
-      </a>
-    </h2>
-
-    {% if post.type == 'DEMAND' %}
-      {% if post.usage %}<span class="badge text-bg-light">{{ post.get_usage_display }}</span>{% endif %}
-      {% if post.dry is not None %}<span class="badge text-bg-light">{{ post.dry|yesno:"건조됨,생,정보없음" }}</span>{% endif %}
-      {% if post.package %}<span class="badge text-bg-light">{{ post.get_package_display }}</span>{% endif %}
-    {% else %}
-      {% if post.amount %}<span class="badge text-bg-light">수량: {{ post.amount }}</span>{% endif %}
-    {% endif %}
-
-    <p class="text-muted small mt-2 mb-0">{{ post.content|default:"" |truncatechars:70 }}</p>
-  </div>
-
-  <div class="card-footer bg-white d-flex justify-content-between">
-    <div>
-      {% if post.price_type == "무료" %}
-        <span class="badge bg-warning text-dark">무료</span>
+      {% if post.type == 'SUPPLY' %}
+        <span class="badge text-bg-light">
+          {{ post.price_type }}{% if post.price_type == "유료" and post.price %} · {{ post.price|intcomma }}원{% endif %}
+        </span>
       {% else %}
-        <span class="fw-bold">{{ post.price|default:"-" }}원</span>
+        <span class="badge text-bg-light">
+          지불의사: {{ post.demand_price_pref|default:"-" }}
+          {% if post.demand_price_pref == "유료" and post.max_budget %} · 최대 {{ post.max_budget|intcomma }}원{% endif %}
+        </span>
       {% endif %}
     </div>
-    <small class="text-muted">
-      by {{ post.author.nickname|default:post.author.username }}
-    </small>
+
+    <h5 class="card-title mb-1">
+      <a href="{% url 'posts:detail' post.pk %}" class="text-decoration-none">{{ post.title }}</a>
+    </h5>
+
+    <div class="text-muted small mb-2">
+      {% if post.place_name %}<strong>{{ post.place_name }}</strong>{% endif %}
+      {% if post.address %}{% if post.place_name %} · {% endif %}{{ post.address }}{% endif %}
+    </div>
+
+    {% if post.type == 'DEMAND' %}
+      <div class="small text-muted">
+        용도: {{ post.usage|default:"-" }} / 건조:
+        {% if post.dry == True %}유{% elif post.dry == False %}무{% else %}-{% endif %}
+        / 포장: {{ post.package|default:"-" }}
+        / {{ post.within_5km|yesno:"5km 이내만,5km 제한 없음" }}
+      </div>
+    {% else %}
+      <div class="small text-muted">수량/단위: {{ post.amount|default:"-" }}</div>
+    {% endif %}
+  </div>
+
+  <div class="card-footer bg-white d-flex justify-content-between align-items-center small text-muted">
+    <span>{{ post.author.nickname|default:post.author.username }}</span>
+    <span>{{ post.created_at|date:"Y-m-d" }}</span>
   </div>
 </div>
