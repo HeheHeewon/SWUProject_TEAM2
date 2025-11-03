@@ -1,0 +1,7 @@
+{% extends "posts/form.html" %}
+{% block title %}이런 커피를 찾아요{% endblock %}
+{% block content %}
+  {% with title="이런 커피를 찾아요" %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}

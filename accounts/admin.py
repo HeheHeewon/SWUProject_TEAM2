@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from .models import Profile
 
+<<<<<<< HEAD
 # Profile 모델을 User 관리자 페이지에 함께 보여주기 위한 설정
 class ProfileInline(admin.StackedInline):
     model = Profile
@@ -16,3 +17,10 @@ class UserAdmin(BaseUserAdmin):
 # 기존 UserAdmin 등록 해제 후 새로운 UserAdmin 등록
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+=======
+#화면 구현 테스트용
+
+from django.contrib import admin
+from .models import User
+admin.site.register(User)
+>>>>>>> TRY1

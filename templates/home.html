@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ReGround — 커피찌꺼기 순환{% endblock %}
+
+{% block content %}
+<section class="py-4 text-center">
+  <h1 class="display-6 fw-bold">커피찌꺼기 나눔과 거래로 만드는 지속 가능한 순환</h1>
+  <p class="text-muted mt-3">우리의 일상 속 커피찌꺼기가 새로운 생명을 만듭니다.</p>
+
+  <div class="mt-3 d-flex gap-2 justify-content-center">
+    {% if request.user.is_authenticated %}
+      <a class="btn btn-primary btn-lg" href="{% url 'posts:supply_new' %}">상품 등록하기</a>
+      <a class="btn btn-success btn-lg" href="{% url 'posts:list' %}?type=DEMAND">이런 커피를 찾아요</a>
+    {% else %}
+      {% url 'login' as login_url %}
+      <a class="btn btn-primary btn-lg" href="{{ login_url }}?next={% url 'posts:supply_new' %}">상품 등록하기</a>
+      <a class="btn btn-success btn-lg" href="{% url 'posts:list' %}?type=DEMAND">이런 커피를 찾아요</a>
+    {% endif %}
+  </div>
+</section>
+
+<hr class="my-5">
+
+<!-- 카드 3개 섹션 -->
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <img src="{% static 'img/coffee1.jpg' %}" class="card-img-top" alt="">
+      <div class="card-body">
+        <h5 class="card-title">매일 쏟아지는 커피의 흔적</h5>
+        <p class="card-text text-muted">버려지는 커피찌꺼기가 자원이 됩니다.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <img src="{% static 'img/coffee2.jpg' %}" class="card-img-top" alt="">
+      <div class="card-body">
+        <h5 class="card-title">다시 피어나는 자원의 순환</h5>
+        <p class="card-text text-muted">퇴비·원예·공예·연구/실험 등으로 재활용됩니다.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <img src="{% static 'img/coffee3.jpg' %}" class="card-img-top" alt="">
+      <div class="card-body">
+        <h5 class="card-title">지구를 깨우는 작은 실천</h5>
+        <p class="card-text text-muted">지속가능한 순환에 함께하세요.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center my-5">
+  {% if request.user.is_authenticated %}
+    <a class="btn btn-dark btn-lg" href="{% url 'posts:supply_new' %}">상품 등록하기</a>
+  {% else %}
+    {% url 'login' as login_url %}
+    <a class="btn btn-dark btn-lg" href="{{ login_url }}?next={% url 'posts:supply_new' %}">상품 등록하기</a>
+  {% endif %}
+</div>
+{% endblock %}
