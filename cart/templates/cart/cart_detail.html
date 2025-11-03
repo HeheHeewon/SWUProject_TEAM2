@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>장바구니</title>
+</head>
+<body>
+    <h1>{{ request.user.username }} 님의 장바구니</h1>
+    
+    {% if cart_items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>상품명</th>
+                    <th>수량</th>
+                    <th>단가</th>
+                    <th>총액</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }}원</td>
+                    <td>{{ item.total_price }}원</td>
+                    <td>
+                        <a href="{% url 'cart:cart_remove' item.product.id %}">삭제</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>총 주문 금액: {{ total_price }}원</h3>
+        <button type="button">주문하기</button>
+        
+    {% else %}
+        <p>장바구니에 담긴 상품이 없습니다.</p>
+    {% endif %}
+
+    <p><a href="{% url 'accounts:mypage' %}">마이페이지로 돌아가기</a></p>
+</body>
+</html>
