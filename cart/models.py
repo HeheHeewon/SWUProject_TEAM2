@@ -22,7 +22,7 @@ class CartItem(models.Model):
         "posts.Post",
         on_delete=models.CASCADE,
         related_name="cart_items",
-        null=True, blank=True,   # ⬅️ 임시로 여기를 nullable
+        # null=True, blank=True,   # ⬅️ 임시로 여기를 nullable
     )
     added_at = models.DateTimeField(auto_now_add=True)
     memo = models.CharField(max_length=120, blank=True)

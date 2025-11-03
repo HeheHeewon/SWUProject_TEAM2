@@ -1,6 +1,7 @@
 {# templates/posts/detail.html #}
 {% extends "base.html" %}
-{% load humanize %}   {# ← 추가 #}
+{% load humanize %}
+
 {% block title %}{{ object.title }}{% endblock %}
 
 {% block content %}
@@ -17,18 +18,22 @@
     <dl class="row">
       <dt class="col-sm-2">거래 장소</dt>
       <dd class="col-sm-10">
-        {% if object.place_name %}{{ object.place_name }}
-        {% elif object.address %}{{ object.address }}
-        {% else %}-{% endif %}
+        {% if object.place_name %}
+          {{ object.place_name }}
+        {% elif object.address %}
+          {{ object.address }}
+        {% else %}
+          -
+        {% endif %}
       </dd>
 
       {% if object.conditions %}
-      <dt class="col-sm-2">거래/수거 조건</dt>
-      <dd class="col-sm-10">{{ object.conditions }}</dd>
+        <dt class="col-sm-2">거래/수거 조건</dt>
+        <dd class="col-sm-10">{{ object.conditions }}</dd>
       {% endif %}
     </dl>
 
-    {# 타입별 상세 #}
+    {# 타입별 상세 정보 #}
     {% if object.type == 'DEMAND' %}
       <h2 class="h6 mt-4">수요 상세</h2>
       <dl class="row">
@@ -45,7 +50,13 @@
 
         <dt class="col-sm-2">건조</dt>
         <dd class="col-sm-10">
-          {% if object.dry == True %}건조됨{% elif object.dry == False %}건조 안 됨{% else %}-{% endif %}
+          {% if object.dry == True %}
+            건조됨
+          {% elif object.dry == False %}
+            건조 안 됨
+          {% else %}
+            -
+          {% endif %}
         </dd>
 
         <dt class="col-sm-2">포장</dt>
@@ -54,6 +65,7 @@
         <dt class="col-sm-2">거리 선호</dt>
         <dd class="col-sm-10">{{ object.within_5km|yesno:"5km 이내만,5km 제한 없음" }}</dd>
       </dl>
+
     {% else %}
       <h2 class="h6 mt-4">공급 상세</h2>
       <dl class="row">
@@ -77,7 +89,7 @@
 
     <hr class="my-4">
 
-    {# 본인만 수정/삭제 #}
+    {# 본인 글일 때: 수정/삭제 버튼 #}
     {% if request.user.is_authenticated and request.user.id == object.author_id %}
       {% if object.type == 'DEMAND' %}
         <a class="btn btn-outline-primary" href="{% url 'posts:demand_edit' object.pk %}">수정</a>
@@ -85,6 +97,17 @@
       {% else %}
         <a class="btn btn-outline-primary" href="{% url 'posts:supply_edit' object.pk %}">수정</a>
         <a class="btn btn-outline-danger"  href="{% url 'posts:supply_delete' object.pk %}">삭제</a>
+      {% endif %}
+
+    {# 내 글이 아닐 때: 장바구니 버튼 노출 #}
+    {% elif object.type == 'SUPPLY' %}
+      {% if request.user.is_authenticated %}
+        <a class="btn btn-primary"  href="{% url 'cart:cart_add' object.pk %}">장바구니 담기</a>
+      {% else %}
+        <a class="btn btn-success"
+           href="{% url 'accounts:login' %}?next={% url 'posts:detail' object.pk %}">
+           장바구니 담기
+        </a>
       {% endif %}
     {% endif %}
 
