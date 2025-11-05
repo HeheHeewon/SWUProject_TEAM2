@@ -1,7 +1,100 @@
-{% extends "posts/form.html" %}
+{# templates/posts/new_demand.html #}
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
 {% block title %}이런 커피를 찾아요{% endblock %}
+
 {% block content %}
-  {% with title="이런 커피를 찾아요" %}
-    {{ block.super }}
-  {% endwith %}
+<div class="container-xxl py-4">
+  <h1 class="fw-bold mb-4" style="color:#2f6e57;">이런 커피를 찾아요</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <!-- 제목 -->
+    <div class="mb-4">
+      <label class="form-label fs-5">제목</label>
+      {{ form.title|add_class:"form-control"|attr:"placeholder:제목을 입력해주세요." }}
+      {% for e in form.title.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <!-- 게시글 내용 -->
+    <div class="mb-4">
+      <label class="form-label fs-5">게시글 내용</label>
+      {{ form.content|add_class:"form-control"|attr:"rows:7"|attr:"placeholder:원하는 커피 상태, 수거 가능 시간대 등을 적어주세요." }}
+      {% for e in form.content.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <!-- 사용 용도 / 건조 / 포장 -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <label class="form-label fs-6">용도</label>
+        {{ form.usage|add_class:"form-select" }}
+        {% for e in form.usage.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fs-6">건조 상태</label>
+        {{ form.dry|add_class:"form-select" }}
+        {% for e in form.dry.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fs-6">포장</label>
+        {{ form.package|add_class:"form-select" }}
+        {% for e in form.package.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+    </div>
+
+    <!-- 5km / 지불의사 + 최대예산 -->
+    <div class="row g-3 mb-4 align-items-end">
+      <div class="col-md-4">
+        <!-- ✅ 라벨 안에 체크박스를 감싸서 for/id 연결 제거 -->
+        <label class="form-check mt-2 d-inline-flex align-items-center gap-2">
+          {{ form.within_5km|add_class:"form-check-input" }}
+          <span class="form-check-label">내 위치 기준 5km 이내만</span>
+        </label>
+        {% for e in form.within_5km.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label fs-6">지불 의사</label>
+        {{ form.demand_price_pref|add_class:"form-select" }}
+        {% for e in form.demand_price_pref.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="col-md-4" id="budgetWrap">
+        <label class="form-label fs-6">최대 예산</label>
+        <div class="input-group">
+          {{ form.max_budget|add_class:"form-control"|attr:"placeholder:예: 5000" }}
+          <span class="input-group-text">원</span>
+        </div>
+        <div class="form-text">* ‘유료’를 선택한 경우에만 입력</div>
+        {% for e in form.max_budget.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+    </div>
+
+    <div class="text-end">
+      <button class="btn btn-success btn-lg px-4">저장</button>
+    </div>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // ✅ id 대신 name 기반으로 안전하게 선택
+  const pref = document.querySelector('[name="{{ form.demand_price_pref.html_name }}"]');
+  const budgetWrap = document.getElementById('budgetWrap');
+  const budgetInput = document.querySelector('[name="{{ form.max_budget.html_name }}"]');
+
+  function toggleBudget() {
+    if (!pref) return;
+    const paid = pref.value === '유료'; // choices 값과 동일해야 함
+    budgetWrap.style.display = paid ? '' : 'none';
+    if (!paid && budgetInput) budgetInput.value = '';
+  }
+
+  toggleBudget();
+  if (pref) pref.addEventListener('change', toggleBudget);
+});
+</script>
 {% endblock %}

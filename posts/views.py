@@ -1,9 +1,38 @@
 # posts/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import render
 from django.urls import reverse_lazy, reverse             # ✅ reverse 추가
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
 from .forms import DemandForm, SupplyForm
+
+NEWS_ITEMS = [
+    {
+        "title": "버려지던 커피 찌꺼기를 자원으로…강동구, '커피찌꺼기 재활용 캠페인' 본격 추진",
+        "url": "https://www.seoulcity.co.kr/news/articleView.html?idxno=501146",
+        "img": "img/news/article4.png",
+        "date": "2025.09.18",
+    },
+    {
+        "title": "커피 찌꺼기, 문 앞에 놔두세요. 재활용합니다",
+        "url": "https://www.khan.co.kr/article/202503131338001",
+        "img": "img/news/article1.png",     # ← static 기준 경로
+        "date": "2025.03.13",
+    },
+    {
+        "title": "스타벅스, 커피 퇴비 농가 지원 5500톤 돌파",
+        "url": "https://www.chosun.com/economy/market_trend/2025/07/15/KWR7HQGCNFE4RD5IACNYHVD3LM/",
+        "img": "img/news/article2.png",
+        "date": "2025.07.15",
+    },
+    {
+        "title": "[브랜드이슈] 업사이클링 브랜드 '커피어게인', 커피찌꺼기 활용한 신제품 내달 출시",
+        "url": "https://www.sisunnews.co.kr/news/articleView.html?idxno=158314",
+        "img": "img/news/article3.png",
+        "date": "2022.02.21",
+    },
+    # 필요하면 계속 추가…
+]
 
 class PostListView(ListView):
     model = Post
@@ -105,3 +134,22 @@ class SupplyDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
     model = Post
     template_name = "posts/confirm_delete.html"
     success_url = reverse_lazy("posts:list")
+
+def home(request):
+    demand_posts = (
+        Post.objects.filter(type=Post.Type.DEMAND)
+        .select_related("author")
+        .order_by("-created_at")[:8]
+    )
+    # 보여줄 뉴스 개수 설정 (6~8 중 택1)
+    NEWS_COUNT = 4 # 또는 8
+    news_items = NEWS_ITEMS[:NEWS_COUNT]  # 앞에서 원하는 개수만
+
+    return render(request,
+                  "home.html",
+            {
+                      "demand_posts": demand_posts,
+                      "news_items": news_items,  # ← 추가
+                    },
+                  )
+

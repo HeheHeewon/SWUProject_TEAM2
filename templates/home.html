@@ -1,56 +1,57 @@
+{# templates/home.html #}
 {% extends "base.html" %}
-{% load static %}
+{% load static humanize %}
 {% block title %}ReGround — 커피찌꺼기 순환{% endblock %}
 
 {% block content %}
-<section class="py-4 text-center">
-  <h1 class="display-6 fw-bold">커피찌꺼기 나눔과 거래로 만드는 지속 가능한 순환</h1>
-  <p class="text-muted mt-3">우리의 일상 속 커피찌꺼기가 새로운 생명을 만듭니다.</p>
 
-  <div class="mt-3 d-flex gap-2 justify-content-center">
-    {% if request.user.is_authenticated %}
-      <a class="btn btn-primary btn-lg" href="{% url 'posts:supply_new' %}">상품 등록하기</a>
-      <a class="btn btn-success btn-lg" href="{% url 'posts:list' %}?type=DEMAND">이런 커피를 찾아요</a>
-    {% else %}
-      {% url 'login' as login_url %}
-      <a class="btn btn-primary btn-lg" href="{{ login_url }}?next={% url 'posts:supply_new' %}">상품 등록하기</a>
-      <a class="btn btn-success btn-lg" href="{% url 'posts:list' %}?type=DEMAND">이런 커피를 찾아요</a>
-    {% endif %}
-  </div>
+{# ── 인트로: 제목/부제 ── #}
+<section class="rg-intro text-center">
+  <h1 class="rg-intro__title">커피찌꺼기 나눔과 거래로 만드는 지속 가능한 순환</h1>
+
+  <p class="rg-intro__subtitle">우리의 일상 속 커피찌꺼기가 새로운 생명을 만듭니다.</p>
+
+  <p class="rg-intro__desc">
+    매일 버려지는 커피 한 잔의 흔적이, 누군가에게는 흙이 되고, 또 다른 이에게는 창작의 재료가 됩니다.
+    카페에서 나온 커피찌꺼기가 정원사의 손에서 퇴비로, 공예가의 손끝에서 작품으로 다시 태어나죠.
+    우리는 이 순환을 통해 커피의 마지막 한 스푼까지 나눔과 연결, 그리고 재생의 시작으로 이어나갑니다.
+    지금, 당신의 커피가 다시 세상을 바꾸는 여정을 떠납니다.
+  </p>
 </section>
 
-<hr class="my-5">
+<hr class="hr-tight">
 
-<!-- 카드 3개 섹션 -->
-<div class="row g-4">
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <img src="{% static 'img/coffee1.jpg' %}" class="card-img-top" alt="">
-      <div class="card-body">
-        <h5 class="card-title">매일 쏟아지는 커피의 흔적</h5>
-        <p class="card-text text-muted">버려지는 커피찌꺼기가 자원이 됩니다.</p>
+{# ── 이미지 카드 3개: 사진 위 텍스트(오버레이) ── #}
+<section class="container px-0">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="rg-feature" style="background-image:url({% static 'img/coffee1.png' %});">
+        <div class="rg-feature__inner">
+          <h3 class="rg-feature__title">매일 쏟아지는<br>커피의 흔적</h3>
+          <p class="rg-feature__caption">한국의 연간 원두 소비량은 연간 15만 톤으로,<br>세계 6위의 규모입니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="rg-feature" style="background-image:url({% static 'img/coffee2.png' %});">
+        <div class="rg-feature__inner">
+          <h3 class="rg-feature__title">다시 피어나는<br>자원의 순환으로</h3>
+          <p class="rg-feature__caption">버려지는 커피를 퇴비·원예 등으로 재활용합니다.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="rg-feature" style="background-image:url({% static 'img/coffee3.png' %});">
+        <div class="rg-feature__inner">
+          <h3 class="rg-feature__title">지구를 깨우는<br>작은 실천</h3>
+          <p class="rg-feature__caption">우리는 지속가능한 사회 실현을 추구합니다.</p>
+        </div>
       </div>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <img src="{% static 'img/coffee2.jpg' %}" class="card-img-top" alt="">
-      <div class="card-body">
-        <h5 class="card-title">다시 피어나는 자원의 순환</h5>
-        <p class="card-text text-muted">퇴비·원예·공예·연구/실험 등으로 재활용됩니다.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="card h-100 shadow-sm">
-      <img src="{% static 'img/coffee3.jpg' %}" class="card-img-top" alt="">
-      <div class="card-body">
-        <h5 class="card-title">지구를 깨우는 작은 실천</h5>
-        <p class="card-text text-muted">지속가능한 순환에 함께하세요.</p>
-      </div>
-    </div>
-  </div>
-</div>
+</section>
 
 <div class="text-center my-5">
   {% if request.user.is_authenticated %}
@@ -60,4 +61,81 @@
     <a class="btn btn-dark btn-lg" href="{{ login_url }}?next={% url 'posts:supply_new' %}">상품 등록하기</a>
   {% endif %}
 </div>
+
+{# ===== 필요 시: '이런 커피를 찾아요!' 최신 8건 섹션 ===== #}
+<hr class="my-5">
+<section class="py-4" style="background:#fffbe6;">
+  <div class="d-flex align-items-center justify-content-between mb-3 container">
+    <h2 class="h3 mb-0">
+      <a href="{% url 'posts:list' %}?type=DEMAND" class="link-dark text-decoration-none">
+        이런 커피를 찾아요! &rsaquo;
+      </a>
+    </h2>
+    <a class="btn btn-outline-success btn-sm" href="{% url 'posts:list' %}?type=DEMAND">전체 보기</a>
+  </div>
+
+  <div class="container">
+    {% if demand_posts %}
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
+        {% for p in demand_posts %}
+          <div class="col">
+            <a href="{% url 'posts:detail' p.pk %}" class="text-decoration-none text-reset">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-success">수요</span>
+                    {% if p.demand_price_pref == "유료" and p.max_budget %}
+                      <span class="badge text-bg-light">지불의사: 유료 · 최대 {{ p.max_budget|intcomma }}원</span>
+                    {% elif p.demand_price_pref == "무료" %}
+                      <span class="badge text-bg-light">지불의사: 무료</span>
+                    {% endif %}
+                  </div>
+                  <h5 class="card-title mb-1">{{ p.author.nickname|default:p.author.username }}</h5>
+                  <p class="text-muted small mb-2">
+                    용도: {{ p.usage|default:"-" }} /
+                    건조: {% if p.dry == True %}유{% elif p.dry == False %}무{% else %}-{% endif %} /
+                    포장: {{ p.package|default:"-" }}
+                  </p>
+                  <p class="card-text text-muted mb-0">{{ p.content|default:""|truncatechars:70 }}</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="container text-muted">최근 수요 글이 아직 없습니다.</div>
+    {% endif %}
+  </div>
+</section>
+
+{# ── 여기서부터 “커피 뉴스” 섹션 ── #}
+<hr class="my-5">
+
+<section class="py-4" style="background:#fffbe6;">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="h3 mb-0">커피 뉴스 <span class="ms-1">›</span></h2>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      {% for n in news_items %}
+      <div class="col">
+        <a class="rg-news-card" href="{{ n.url }}" target="_blank" rel="noopener noreferrer">
+          <div class="rg-news-thumb"
+               style="background-image:url('{% static n.img %}');"></div>
+          <div class="rg-news-body">
+            <p class="rg-news-title">{{ n.title }}</p>
+            <div class="rg-news-meta">
+              {{ n.date }}
+              <span class="rg-news-arrow">→</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 {% endblock %}

@@ -1,0 +1,152 @@
+/* ===== Global font family ===== */
+html, body{
+  font-family: Pretendard, "Noto Sans KR", system-ui, -apple-system, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+}
+
+/* =========================================================
+   Intro (home 상단) — 변수 기반 고정값
+   ========================================================= */
+:root{
+  --intro-title-size: 3.2rem;      /* 제목 크기 */
+  --intro-subtitle-size: 1.15rem;  /* 부제 크기 */
+  --intro-desc-size: 0.96rem;      /* 본문 크기 */
+  --intro-maxw: 980px;             /* 본문 줄 길이 */
+  --intro-title-lh: 1.18;          /* 제목 line-height */
+  --intro-gap: 1.25rem;            /* 제목↔부제, 부제↔본문 간격 */
+  --intro-pt: 3.5rem;              /* 인트로 상단 여백 */
+  --intro-pb: 1.25rem;             /* 인트로 하단 여백 */
+}
+
+.rg-intro{
+  text-align: center;
+  padding-top: var(--intro-pt);
+  padding-bottom: var(--intro-pb);
+}
+
+.rg-intro__title{
+  margin: 0 0 var(--intro-gap) 0;
+  font-weight: 800;
+  font-size: var(--intro-title-size);
+  line-height: var(--intro-title-lh);
+  letter-spacing: -0.02em;
+}
+
+.rg-intro__subtitle{
+  margin: 0 0 var(--intro-gap) 0;
+  color: #111;
+  font-weight: 700;
+  font-size: var(--intro-subtitle-size);
+}
+
+.rg-intro__desc{
+  max-width: var(--intro-maxw);
+  margin: 0 auto;
+  color: #555;
+  font-size: var(--intro-desc-size);
+  line-height: 1.75;
+}
+
+/* 화면이 작아질 때는 살짝 축소 */
+@media (max-width: 992px){
+  :root{
+    --intro-title-size: 2.4rem;
+    --intro-subtitle-size: 1.05rem;
+    --intro-desc-size: 0.95rem;
+    --intro-maxw: 720px;
+    --intro-pt: 3rem;
+  }
+}
+@media (max-width: 576px){
+  :root{
+    --intro-title-size: 1.9rem;
+    --intro-maxw: 92vw;
+    --intro-pt: 2.5rem;
+  }
+}
+
+/* =========================================================
+   Feature Cards (사진 위 텍스트 오버레이)
+   ========================================================= */
+.rg-feature{
+  position: relative;
+  height: 380px;
+  border-radius: 28px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+}
+.rg-feature::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,.55) 0%,
+    rgba(0,0,0,.15) 40%,
+    rgba(0,0,0,.55) 100%
+  );
+}
+.rg-feature__inner{
+  position: absolute; inset:0;
+  display: flex; flex-direction: column;
+  justify-content: space-between;
+  padding: 28px;
+  z-index:1; color:#fff;
+}
+.rg-feature__title{
+  margin:0;
+  font-weight: 800;
+  letter-spacing: -.2px;
+  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+  text-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.rg-feature__caption{
+  margin:0;
+  font-size: .95rem;
+  opacity: .95;
+  text-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+
+/* 모바일에서 카드 높이 약간 낮춤 */
+@media (max-width: 576px){
+  .rg-feature{ height: 300px; }
+}
+
+/* =========================================================
+   News cards (커피 뉴스)
+   ========================================================= */
+.rg-news-card{
+  display:block;
+  background:#fff;
+  border-radius:20px;
+  overflow:hidden;
+  text-decoration:none;
+  color:inherit;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+  transition:.2s transform ease, .2s box-shadow ease;
+}
+.rg-news-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 40px rgba(0,0,0,.12);
+}
+
+.rg-news-thumb{
+  height:220px;                 /* 썸네일 높이 */
+  background-size:cover;
+  background-position:center;
+}
+
+.rg-news-body{ padding:18px; }
+.rg-news-title{
+  margin:0 0 8px 0;
+  font-weight:600;
+  line-height:1.4;
+  min-height:3.6em;            /* 2줄 고정 높이(대략) */
+}
+.rg-news-meta{
+  font-size:.9rem;
+  color:#666;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.rg-news-arrow{ opacity:.6; }
