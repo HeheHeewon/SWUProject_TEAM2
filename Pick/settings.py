@@ -141,4 +141,4 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/accounts/mypage/'
 
 # 로그아웃 후 리다이렉트될 URL (선택 사항, 홈이나 로그인 페이지로 설정)
-LOGOUT_REDIRECT_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/'
