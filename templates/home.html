@@ -55,11 +55,16 @@
 
 <div class="text-center my-5">
   {% if request.user.is_authenticated %}
-    <a class="btn btn-dark btn-lg" href="{% url 'posts:supply_new' %}">상품 등록하기</a>
+    <a class="btn btn-success btn-lg px-4 py-2" href="{% url 'posts:list' %}">
+      커피박 거래하러 가기
+    </a>
   {% else %}
-    {% url 'login' as login_url %}
-    <a class="btn btn-dark btn-lg" href="{{ login_url }}?next={% url 'posts:supply_new' %}">상품 등록하기</a>
-  {% endif %}
+    {# 로그인 후 목록으로 #}
+    <a class="btn btn-success btn-lg px-4 py-2"
+       href="{% url 'accounts:login' %}?next={% url 'posts:list' %}">
+       커피박 거래하러 가기
+    </a>
+   {% endif %}
 </div>
 
 {# ===== 필요 시: '이런 커피를 찾아요!' 최신 8건 섹션 ===== #}
@@ -71,7 +76,7 @@
         이런 커피를 찾아요! &rsaquo;
       </a>
     </h2>
-    <a class="btn btn-outline-success btn-sm" href="{% url 'posts:list' %}?type=DEMAND">전체 보기</a>
+<a class="btn btn-outline-success btn-sm" href="{% url 'posts:browse_demand' %}">전체 보기</a>
   </div>
 
   <div class="container">

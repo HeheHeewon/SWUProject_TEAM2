@@ -4,50 +4,31 @@ html, body{
                Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
 }
 
-/* =========================================================
-   Intro (home 상단) — 변수 기반 고정값
-   ========================================================= */
+/* 화면에서만 숨기고 스크린리더에는 읽히게 */
+.visually-hidden{
+  position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* ================================
+   Intro (home 상단) — 변수
+   ================================ */
 :root{
-  --intro-title-size: 3.2rem;      /* 제목 크기 */
-  --intro-subtitle-size: 1.15rem;  /* 부제 크기 */
-  --intro-desc-size: 0.96rem;      /* 본문 크기 */
-  --intro-maxw: 980px;             /* 본문 줄 길이 */
-  --intro-title-lh: 1.18;          /* 제목 line-height */
-  --intro-gap: 1.25rem;            /* 제목↔부제, 부제↔본문 간격 */
-  --intro-pt: 3.5rem;              /* 인트로 상단 여백 */
-  --intro-pb: 1.25rem;             /* 인트로 하단 여백 */
+  --intro-title-size: 3.2rem;
+  --intro-subtitle-size: 1.15rem;
+  --intro-desc-size: 0.96rem;
+  --intro-maxw: 980px;
+  --intro-title-lh: 1.18;
+  --intro-gap: 1.25rem;
+  --intro-pt: 3.5rem;
+  --intro-pb: 1.25rem;
 }
 
-.rg-intro{
-  text-align: center;
-  padding-top: var(--intro-pt);
-  padding-bottom: var(--intro-pb);
-}
+.rg-intro{ text-align:center; padding-top:var(--intro-pt); padding-bottom:var(--intro-pb); }
+.rg-intro__title{ margin:0 0 var(--intro-gap) 0; font-weight:800; font-size:var(--intro-title-size); line-height:var(--intro-title-lh); letter-spacing:-.02em; }
+.rg-intro__subtitle{ margin:0 0 var(--intro-gap) 0; color:#111; font-weight:700; font-size:var(--intro-subtitle-size); }
+.rg-intro__desc{ max-width:var(--intro-maxw); margin:0 auto; color:#555; font-size:var(--intro-desc-size); line-height:1.75; }
 
-.rg-intro__title{
-  margin: 0 0 var(--intro-gap) 0;
-  font-weight: 800;
-  font-size: var(--intro-title-size);
-  line-height: var(--intro-title-lh);
-  letter-spacing: -0.02em;
-}
-
-.rg-intro__subtitle{
-  margin: 0 0 var(--intro-gap) 0;
-  color: #111;
-  font-weight: 700;
-  font-size: var(--intro-subtitle-size);
-}
-
-.rg-intro__desc{
-  max-width: var(--intro-maxw);
-  margin: 0 auto;
-  color: #555;
-  font-size: var(--intro-desc-size);
-  line-height: 1.75;
-}
-
-/* 화면이 작아질 때는 살짝 축소 */
 @media (max-width: 992px){
   :root{
     --intro-title-size: 2.4rem;
@@ -58,95 +39,160 @@ html, body{
   }
 }
 @media (max-width: 576px){
-  :root{
-    --intro-title-size: 1.9rem;
-    --intro-maxw: 92vw;
-    --intro-pt: 2.5rem;
+  :root{ --intro-title-size: 1.9rem; --intro-maxw: 92vw; --intro-pt: 2.5rem; }
+}
+
+/* ================================
+   Feature card
+   ================================ */
+.rg-feature{ position:relative; height:380px; border-radius:28px; overflow:hidden; background-size:cover; background-position:center; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+.rg-feature::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.15) 40%, rgba(0,0,0,.55) 100%); }
+.rg-feature__inner{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:space-between; padding:28px; z-index:1; color:#fff; }
+.rg-feature__title{ margin:0; font-weight:800; letter-spacing:-.2px; font-size:clamp(1.25rem, 2.2vw, 1.6rem); text-shadow:0 2px 8px rgba(0,0,0,.25); }
+.rg-feature__caption{ margin:0; font-size:.95rem; opacity:.95; text-shadow:0 2px 8px rgba(0,0,0,.25); }
+
+@media (max-width: 576px){ .rg-feature{ height:300px; } }
+
+/* ================================
+   News cards
+   ================================ */
+.rg-news-card{ display:block; background:#fff; border-radius:20px; overflow:hidden; text-decoration:none; color:inherit; box-shadow:0 10px 30px rgba(0,0,0,.08); transition:.2s transform ease,.2s box-shadow ease; }
+.rg-news-card:hover{ transform:translateY(-2px); box-shadow:0 16px 40px rgba(0,0,0,.12); }
+.rg-news-thumb{ height:220px; background-size:cover; background-position:center; }
+.rg-news-body{ padding:18px; }
+.rg-news-title{ margin:0 0 8px 0; font-weight:600; line-height:1.4; min-height:3.6em; }
+.rg-news-meta{ font-size:.9rem; color:#666; display:flex; align-items:center; justify-content:space-between; }
+.rg-news-arrow{ opacity:.6; }
+
+/* ================================
+   (선택) 판매자 리스트 grid 카드
+   ================================ */
+.rg-supply-card{ display:grid; grid-template-columns:1.8fr 1.2fr; gap:0; background:#fff; border:1px solid rgba(0,0,0,.06); border-radius:14px; overflow:hidden; box-shadow:0 4px 14px rgba(0,0,0,.04); margin-bottom:12px; }
+.rg-supply-left{ padding:18px 20px; background:#f9fff8; }
+.rg-supply-right{ padding:18px 20px; background:#eef9f0; border-left:1px solid rgba(0,0,0,.06); }
+
+/* 큰 아바타(48px) & 이니셜 아바타 */
+.rg-avatar-48{ width:48px; height:48px; border-radius:50%; object-fit:cover; }
+.rg-initial-avatar{
+  width:48px; height:48px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:1.05rem; letter-spacing:.5px;
+  color:#2f6e57; background:#e7f4ed; border:1px solid rgba(0,0,0,.06);
+}
+
+@media (max-width: 992px){
+  .rg-supply-card{ grid-template-columns:1fr; }
+  .rg-supply-right{ border-left:none; border-top:1px solid rgba(0,0,0,.06); }
+}
+
+/* ================================
+   공통 카드 — 좌우 1:1 + 가운데 구분선
+   ================================ */
+.rg-card{
+  display: grid;
+  grid-template-columns: 1fr 1fr;      /* 좌:우 = 반반 */
+  align-items: stretch;
+  gap: 0;                               /* 가운데 틈 제거 */
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 26px rgba(0,0,0,.06);
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.06);
+  min-height: 120px;
+}
+
+/* 왼쪽(작성자/내용) */
+.rg-left{ padding:18px 22px; background:#fff; }
+
+/* 오른쪽(메타 + 버튼) */
+.rg-right{
+  padding:18px 22px;
+  background:#e6f3ec;                    /* 연한 초록 */
+  border-left:1px solid rgba(0,0,0,.08);  /* 가운데 세로선 */
+  display:flex; flex-direction:column; gap:6px;
+}
+
+/* 오른쪽 텍스트 톤 */
+.rg-right b{ color:#111; }
+.rg-right .text-success{ color:#2f6e57 !important; }
+.rg-right .text-body{ color:#111 !important; }
+
+/* 모바일: 세로 스택 + 가로선 */
+@media (max-width: 992px){
+  .rg-card{ grid-template-columns:1fr; }
+  .rg-right{ border-left:none; border-top:1px solid rgba(0,0,0,.08); }
+}
+
+/* 상단 큰 제목 & 탭 */
+.rg-page-title{
+  margin: 0 0 .25rem 0;
+  font-size: clamp(1.8rem, 2.6vw, 2.25rem);
+  font-weight: 800;
+  color:#2f6e57;
+  letter-spacing: -.5px;
+}
+.rg-tabs{ align-items: center; }
+.rg-tab-link{
+  position: relative;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #6a8a7d;
+  text-decoration: none;
+  padding-bottom: .35rem;
+}
+.rg-tab-link:hover{ color:#2f6e57; }
+.rg-tab-link.is-active{ color:#2f6e57; }
+.rg-tab-link.is-active::after{
+  content:"";
+  position:absolute; left:0; bottom:-4px;
+  width:100%; height:4px;
+  background:#2f6e57; border-radius: 2px;
+}
+
+/* 부트스트랩 보조 톤 정합 */
+.bg-success-subtle { background:#e6f3ec !important; }
+
+/* ======= 대형 상단 탭 (제목처럼 크게) ======= */
+.rg-toprow{
+  display:flex;
+  justify-content:space-between;   /* 왼쪽/오른쪽으로 벌리기 */
+  align-items:flex-end;
+  gap:24px;
+  margin: 4px 0 18px 0;
+}
+
+.rg-toprow .rg-toplink{
+  display:inline-block;
+  position:relative;
+  font-weight:800;
+  font-size: clamp(1.6rem, 2.4vw, 2.25rem);  /* 큰 제목 크기 */
+  letter-spacing:-0.5px;
+  text-decoration:none;
+  color:#8aa29a;                 /* 비활성(연초록-회색) */
+  padding-bottom:6px;            /* 밑줄 공간 */
+  line-height:1.1;
+}
+
+/* Hover/활성 색상 */
+.rg-toprow .rg-toplink:hover{ color:#2f6e57; }
+.rg-toprow .rg-toplink.is-active{ color:#2f6e57; }
+
+/* 활성 탭 밑줄 */
+.rg-toprow .rg-toplink.is-active::after{
+  content:"";
+  position:absolute; left:0; bottom:0;
+  width:100%; height:6px;
+  background:#2f6e57;
+  border-radius: 4px;
+}
+
+/* 반응형: 폭 좁을 땐 한 줄로 전환 */
+@media (max-width: 576px){
+  .rg-toprow{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
   }
 }
 
-/* =========================================================
-   Feature Cards (사진 위 텍스트 오버레이)
-   ========================================================= */
-.rg-feature{
-  position: relative;
-  height: 380px;
-  border-radius: 28px;
-  overflow: hidden;
-  background-size: cover;
-  background-position: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,.08);
-}
-.rg-feature::after{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(
-    180deg,
-    rgba(0,0,0,.55) 0%,
-    rgba(0,0,0,.15) 40%,
-    rgba(0,0,0,.55) 100%
-  );
-}
-.rg-feature__inner{
-  position: absolute; inset:0;
-  display: flex; flex-direction: column;
-  justify-content: space-between;
-  padding: 28px;
-  z-index:1; color:#fff;
-}
-.rg-feature__title{
-  margin:0;
-  font-weight: 800;
-  letter-spacing: -.2px;
-  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
-  text-shadow: 0 2px 8px rgba(0,0,0,.25);
-}
-.rg-feature__caption{
-  margin:0;
-  font-size: .95rem;
-  opacity: .95;
-  text-shadow: 0 2px 8px rgba(0,0,0,.25);
-}
-
-/* 모바일에서 카드 높이 약간 낮춤 */
-@media (max-width: 576px){
-  .rg-feature{ height: 300px; }
-}
-
-/* =========================================================
-   News cards (커피 뉴스)
-   ========================================================= */
-.rg-news-card{
-  display:block;
-  background:#fff;
-  border-radius:20px;
-  overflow:hidden;
-  text-decoration:none;
-  color:inherit;
-  box-shadow:0 10px 30px rgba(0,0,0,.08);
-  transition:.2s transform ease, .2s box-shadow ease;
-}
-.rg-news-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 16px 40px rgba(0,0,0,.12);
-}
-
-.rg-news-thumb{
-  height:220px;                 /* 썸네일 높이 */
-  background-size:cover;
-  background-position:center;
-}
-
-.rg-news-body{ padding:18px; }
-.rg-news-title{
-  margin:0 0 8px 0;
-  font-weight:600;
-  line-height:1.4;
-  min-height:3.6em;            /* 2줄 고정 높이(대략) */
-}
-.rg-news-meta{
-  font-size:.9rem;
-  color:#666;
-  display:flex; align-items:center; justify-content:space-between;
-}
-.rg-news-arrow{ opacity:.6; }

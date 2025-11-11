@@ -1,7 +1,6 @@
 {# templates/posts/new_demand.html #}
 {% extends "base.html" %}
-{% load static %}
-{% load widget_tweaks %}
+{% load static widget_tweaks %}
 
 {% block title %}이런 커피를 찾아요{% endblock %}
 
@@ -26,7 +25,7 @@
       {% for e in form.content.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
     </div>
 
-    <!-- 사용 용도 / 건조 / 포장 -->
+    <!-- 용도 / 건조 / 포장 -->
     <div class="row g-3 mb-4">
       <div class="col-md-4">
         <label class="form-label fs-6">용도</label>
@@ -45,32 +44,45 @@
       </div>
     </div>
 
-    <!-- 5km / 지불의사 + 최대예산 -->
-    <div class="row g-3 mb-4 align-items-end">
+    <!-- 지불 의사(왼쪽) / 희망 거래방식(가운데) / 5km 체크(오른쪽) -->
+    <div class="row g-3 mb-4 align-items-start">
+
+      <!-- 지불 의사 + 최대 예산 -->
       <div class="col-md-4">
-        <!-- ✅ 라벨 안에 체크박스를 감싸서 for/id 연결 제거 -->
-        <label class="form-check mt-2 d-inline-flex align-items-center gap-2">
+        <label class="form-label fs-6">지불 의사</label>
+        {{ form.demand_price_pref|add_class:"form-select" }}
+        {% for e in form.demand_price_pref.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+
+        <div id="budgetWrap" class="mt-2">
+          <label class="form-label fs-6 mb-1">최대 예산</label>
+          <div class="input-group">
+            {{ form.max_budget|add_class:"form-control"|attr:"placeholder:예: 5000" }}
+            <span class="input-group-text">원</span>
+          </div>
+          <div class="form-text">* ‘유료’를 선택한 경우에만 입력</div>
+          {% for e in form.max_budget.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <!-- 희망 거래방식 체크박스 -->
+      <div class="col-md-4">
+        <label class="form-label fs-6 d-block">희망 거래방식</label>
+        <div class="rg-checklist">
+          {{ form.conditions }}
+        </div>
+        {% for e in form.conditions.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+
+      <!-- 5km 체크 -->
+      <div class="col-md-4">
+        <label class="form-label fs-6 d-block">범위</label>
+        <label class="form-check d-inline-flex align-items-center gap-2 mt-1">
           {{ form.within_5km|add_class:"form-check-input" }}
           <span class="form-check-label">내 위치 기준 5km 이내만</span>
         </label>
         {% for e in form.within_5km.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
       </div>
 
-      <div class="col-md-4">
-        <label class="form-label fs-6">지불 의사</label>
-        {{ form.demand_price_pref|add_class:"form-select" }}
-        {% for e in form.demand_price_pref.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-      </div>
-
-      <div class="col-md-4" id="budgetWrap">
-        <label class="form-label fs-6">최대 예산</label>
-        <div class="input-group">
-          {{ form.max_budget|add_class:"form-control"|attr:"placeholder:예: 5000" }}
-          <span class="input-group-text">원</span>
-        </div>
-        <div class="form-text">* ‘유료’를 선택한 경우에만 입력</div>
-        {% for e in form.max_budget.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
-      </div>
     </div>
 
     <div class="text-end">
@@ -79,20 +91,29 @@
   </form>
 </div>
 
+<style>
+/* 희망 거래방식 체크박스: 가로 배치 + 줄바꿈 */
+.rg-checklist ul{
+  list-style:none; padding-left:0; margin:0;
+  display:flex; gap:1rem; flex-wrap:wrap;
+}
+.rg-checklist li{
+  display:inline-flex; align-items:center; gap:.35rem;
+}
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // ✅ id 대신 name 기반으로 안전하게 선택
   const pref = document.querySelector('[name="{{ form.demand_price_pref.html_name }}"]');
   const budgetWrap = document.getElementById('budgetWrap');
   const budgetInput = document.querySelector('[name="{{ form.max_budget.html_name }}"]');
 
   function toggleBudget() {
     if (!pref) return;
-    const paid = pref.value === '유료'; // choices 값과 동일해야 함
+    const paid = pref.value === '유료';
     budgetWrap.style.display = paid ? '' : 'none';
     if (!paid && budgetInput) budgetInput.value = '';
   }
-
   toggleBudget();
   if (pref) pref.addEventListener('change', toggleBudget);
 });
