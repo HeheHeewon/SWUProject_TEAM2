@@ -1,11 +1,13 @@
-# posts/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render
-from django.urls import reverse_lazy, reverse             # ✅ reverse 추가
+from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
 from .forms import DemandForm, SupplyForm
 
+# ─────────────────────────────────────────────────────────
+# (홈 섹션) 뉴스 목업
+# ─────────────────────────────────────────────────────────
 NEWS_ITEMS = [
     {
         "title": "버려지던 커피 찌꺼기를 자원으로…강동구, '커피찌꺼기 재활용 캠페인' 본격 추진",
@@ -16,7 +18,7 @@ NEWS_ITEMS = [
     {
         "title": "커피 찌꺼기, 문 앞에 놔두세요. 재활용합니다",
         "url": "https://www.khan.co.kr/article/202503131338001",
-        "img": "img/news/article1.png",     # ← static 기준 경로
+        "img": "img/news/article1.png",
         "date": "2025.03.13",
     },
     {
@@ -31,13 +33,15 @@ NEWS_ITEMS = [
         "img": "img/news/article3.png",
         "date": "2022.02.21",
     },
-    # 필요하면 계속 추가…
 ]
 
+# ─────────────────────────────────────────────────────────
+# 공용 목록/상세
+# ─────────────────────────────────────────────────────────
 class PostListView(ListView):
     model = Post
     template_name = "posts/list.html"
-    paginate_by = 20  # ✅ 주석으로
+    paginate_by = 20
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -61,26 +65,27 @@ class PostListView(ListView):
 
         return qs
 
+
 class PostDetailView(DetailView):
     model = Post
     template_name = "posts/detail.html"
 
+# ─────────────────────────────────────────────────────────
+# 생성/수정/삭제
+# ─────────────────────────────────────────────────────────
 class DemandCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = DemandForm
     template_name = "posts/new_demand.html"
-    # 상세로 보내고 싶으면 get_success_url로 통일해도 됨
     success_url = reverse_lazy("posts:list")
 
     def form_valid(self, form):
         form.instance.type = Post.Type.DEMAND
         form.instance.author = self.request.user
-        # 수요글: 실제 거래가 금지 -> 확실히 None
-        form.instance.price = None
-        # 수요글: 사용자가 고른 지불 의사(demand_price_pref)를 모델의 price_type에도 반영
-        # (price_type 필드가 공통 필수이므로 일관성 보장)
+        form.instance.price = None  # 수요글은 실제 거래가 금지
         form.instance.price_type = form.instance.demand_price_pref
         return super().form_valid(form)
+
 
 class SupplyCreateView(LoginRequiredMixin, CreateView):
     model = Post
@@ -93,18 +98,18 @@ class SupplyCreateView(LoginRequiredMixin, CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
+
 class AuthorOnlyMixin(UserPassesTestMixin):
     def test_func(self):
         return self.get_object().author_id == self.request.user.id
 
-# ✅ UpdateView는 상세로 리다이렉트
+
 class DemandUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     model = Post
     form_class = DemandForm
     template_name = "posts/edit_demand.html"
 
     def form_valid(self, form):
-        # 업데이트 시에도 동일한 규칙 유지
         form.instance.type = Post.Type.DEMAND
         form.instance.price = None
         form.instance.price_type = form.instance.demand_price_pref
@@ -112,6 +117,7 @@ class DemandUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("posts:detail", args=[self.object.pk])
+
 
 class SupplyUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     model = Post
@@ -125,31 +131,108 @@ class SupplyUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
     def get_success_url(self):
         return reverse("posts:detail", args=[self.object.pk])
 
+
 class DemandDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
     model = Post
     template_name = "posts/confirm_delete.html"
     success_url = reverse_lazy("posts:list")
+
 
 class SupplyDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
     model = Post
     template_name = "posts/confirm_delete.html"
     success_url = reverse_lazy("posts:list")
 
+# ─────────────────────────────────────────────────────────
+# 홈
+# ─────────────────────────────────────────────────────────
 def home(request):
     demand_posts = (
         Post.objects.filter(type=Post.Type.DEMAND)
         .select_related("author")
-        .order_by("-created_at")[:8]
+        .order_by("-created_at")[:4]
     )
-    # 보여줄 뉴스 개수 설정 (6~8 중 택1)
-    NEWS_COUNT = 4 # 또는 8
-    news_items = NEWS_ITEMS[:NEWS_COUNT]  # 앞에서 원하는 개수만
+    NEWS_COUNT = 4 # 보여지는 뉴스의 개수
+    news_items = NEWS_ITEMS[:NEWS_COUNT]
+    return render(
+        request,
+        "home.html",
+        {"demand_posts": demand_posts, "news_items": news_items},
+    )
 
-    return render(request,
-                  "home.html",
-            {
-                      "demand_posts": demand_posts,
-                      "news_items": news_items,  # ← 추가
-                    },
-                  )
+# ─────────────────────────────────────────────────────────
+# 전용 목록: 공급 / 수요
+# ─────────────────────────────────────────────────────────
+class SupplyOnlyListView(ListView):
+    """
+    공급글만 모아서 보여주는 전용 목록.
+    템플릿은 posts/list.html 공용을 쓰고, only_supply 플래그로 카드 모양 분기.
+    """
+    model = Post
+    template_name = "posts/list.html"
+    context_object_name = "posts"
+    paginate_by = 20
+
+    def get_queryset(self):
+        return (
+            Post.objects.filter(type=Post.Type.SUPPLY)
+            .select_related("author")
+            .order_by("-created_at")
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["page_title"] = "판매자 상품 둘러보기"
+        ctx["only_supply"] = True
+        return ctx
+
+
+class DemandOnlyListView(ListView):
+    """
+    수요글만 모아서 보여주는 전용 목록.
+    템플릿은 posts/list.html 공용을 쓰고, only_demand 플래그로 카드 모양 분기.
+    """
+    model = Post
+    template_name = "posts/list.html"
+    context_object_name = "posts"
+    paginate_by = 20
+
+    def get_queryset(self):
+        return (
+            Post.objects.filter(type=Post.Type.DEMAND)
+            .select_related("author")
+            .order_by("-created_at")
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["page_title"] = "이런 커피를 찾아요!"
+        ctx["only_demand"] = True
+        return ctx
+
+
+# views.py
+from django.core.paginator import Paginator
+from django.views.generic import TemplateView
+# ... (기존 import 그대로)
+
+class DualListView(TemplateView):
+    """
+    좌측: 수요글, 우측: 공급글을 한 화면에서 동시 표기.
+    각각 별도 페이지네이션(page_demand, page_supply 사용).
+    """
+    template_name = "posts/list_dual.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["page_title"] = "게시글"
+        ctx["demand_posts"] = (
+            Post.objects.filter(type=Post.Type.DEMAND)
+            .select_related("author").order_by("-created_at")
+        )
+        ctx["supply_posts"] = (
+            Post.objects.filter(type=Post.Type.SUPPLY)
+            .select_related("author").order_by("-created_at")
+        )
+        return ctx
 

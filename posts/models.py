@@ -99,6 +99,10 @@ class Post(models.Model):
                 raise ValidationError({"max_budget": "유료를 원하면 최대 예산(원)을 적어주세요."})
             if self.demand_price_pref == self.PriceType.FREE and self.max_budget is not None:
                 raise ValidationError({"max_budget": "무료만 원한다면 예산은 비워두세요."})
-
+    # ── 파생 속성: "직거래,택배" → ["직거래", "택배"] ──
+    @property
+    def conditions_list(self):
+        s = self.conditions or ""
+        return [x.strip() for x in s.split(",") if x.strip()]
     def __str__(self):
         return f"[{self.get_type_display()}] {self.title}"
