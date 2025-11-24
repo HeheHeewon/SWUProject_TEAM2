@@ -5,6 +5,9 @@ from django.views.generic import TemplateView, RedirectView  # 홈(랜딩)용
 from django.contrib.auth import views as auth_views    # 커스텀 로그인 템플릿용
 from posts import views as post_views   # ✅ 추가
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 from posts.views import home
 
 urlpatterns = [
@@ -23,4 +26,12 @@ urlpatterns = [
 
     path('cart/', include('cart.urls')),  # accounts/urls.py가 있어야 함
     path('posts/', include('posts.urls', namespace='posts')),
+
+    path("guides/", include("guides.urls", namespace="guides")),
+    path("chat/", include("chat.urls", namespace="chat")),
 ]
+
+# 👇 이 부분 새로 추가
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

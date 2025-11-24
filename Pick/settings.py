@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'accounts',
     'cart',
     'posts',
+    'guides',  # 또는 "guides.apps.GuidesConfig"
+    'chat',
 ]
 
 MIDDLEWARE = [

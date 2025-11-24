@@ -106,3 +106,12 @@ class Post(models.Model):
         return [x.strip() for x in s.split(",") if x.strip()]
     def __str__(self):
         return f"[{self.get_type_display()}] {self.title}"
+
+    @property
+    def has_trade(self):
+        """
+        이 게시글과 연결된 대화(Conversation) 중
+        Trade 가 하나라도 있으면 True, 아니면 False
+        """
+        return self.conversations.filter(trade__isnull=False).exists()
+        # ↑ Conversation 에서 Post 로의 related_name 이 'conversations' 라는 가정

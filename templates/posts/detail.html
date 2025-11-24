@@ -99,19 +99,50 @@
         <a class="btn btn-outline-danger"  href="{% url 'posts:supply_delete' object.pk %}">삭제</a>
       {% endif %}
 
-    {# 내 글이 아닐 때: 장바구니 버튼 노출 #}
+    {# 내 글이 아닐 때: 장바구니 버튼 노출 (공급글만) #}
     {% elif object.type == 'SUPPLY' %}
       {% if request.user.is_authenticated %}
-        <a class="btn btn-primary"  href="{% url 'cart:cart_add' object.pk %}">장바구니 담기</a>
+        <!--a class="btn btn-primary"  href="{% url 'cart:cart_add' object.pk %}">장바구니 담기</a!-->
       {% else %}
-        <a class="btn btn-success"
+        <!--a class="btn btn-success"
            href="{% url 'accounts:login' %}?next={% url 'posts:detail' object.pk %}">
            장바구니 담기
-        </a>
+        </a!-->
       {% endif %}
     {% endif %}
 
-    <a class="btn btn-link" href="{% url 'posts:list' %}">목록으로</a>
+    {# 🔥 거래하기 / 거래 완료 버튼 (본인 글이면 숨김) #}
+    {% if request.user.is_authenticated and request.user != object.author %}
+      {% if object.has_trade %}
+        <button class="btn btn-secondary mb-3" disabled>
+          거래 완료
+        </button>
+      {% else %}
+       {% if object.type == "SUPPLY" %}
+          {# 공급글: 채팅 시작 (거래하기) #}
+        <a class="btn btn-success mb-3"
+           href="{% url 'chat:start' object.pk %}">
+          거래하기
+        </a>
+            {% else %}
+          {# 수요글: 내 판매글로 제안하기 화면으로 이동 #}
+          <a class="btn btn-success mb-3"
+             href="{% url 'chat:suggest_pick_supply' object.pk %}">
+            제안하기
+          </a>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+
+    {% if object.type == 'DEMAND' %}
+  <a class="btn btn-link" href="{% url 'posts:browse_demand' %}">
+    목록으로
+  </a>
+{% else %}
+  <a class="btn btn-link" href="{% url 'posts:browse' %}">
+    목록으로
+  </a>
+{% endif %}
   </div>
 </div>
 {% endblock %}

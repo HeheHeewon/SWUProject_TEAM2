@@ -1,6 +1,7 @@
 {# templates/home.html #}
 {% extends "base.html" %}
 {% load static humanize %}
+
 {% block title %}ReGround — 커피찌꺼기 순환{% endblock %}
 
 {% block content %}
@@ -53,92 +54,176 @@
   </div>
 </section>
 
+{# ── 커피박 거래하러 가기 ── #}
 <div class="text-center my-5">
   {% if request.user.is_authenticated %}
-    {# BEFORE: href="{% url 'posts:list' %}" #}
     <a class="btn btn-success btn-lg px-4 py-2" href="{% url 'posts:browse' %}">
       커피박 거래하러 가기
     </a>
   {% else %}
-    {# 로그인 후 목록으로 #}
     <a class="btn btn-success btn-lg px-4 py-2"
        href="{% url 'accounts:login' %}?next={% url 'posts:browse' %}">
        커피박 거래하러 가기
     </a>
-   {% endif %}
+  {% endif %}
 </div>
 
-{# ===== 필요 시: '이런 커피를 찾아요!' 최신 8건 섹션 ===== #}
+{# === 이런 커피를 찾아요! (수요 미리보기) === #}
 <hr class="my-5">
-<section class="py-4" style="background:#fffbe6;">
-  <div class="d-flex align-items-center justify-content-between mb-3 container">
-    <h2 class="h3 mb-0">
-      <a href="{% url 'posts:list' %}?type=DEMAND" class="link-dark text-decoration-none">
-        이런 커피를 찾아요! &rsaquo;
-      </a>
-    </h2>
-<a class="btn btn-outline-success btn-sm" href="{% url 'posts:browse_demand' %}">전체 보기</a>
+<section class="py-4 rg-section-white">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="rg-sec-title mb-0">
+        <a href="{% url 'posts:browse_demand' %}">이런 커피를 찾아요! ›</a>
+      </h2>
+    </div>
+
+    {% if demand_posts %}
+      <div class="row g-3">
+        {% for post in demand_posts %}
+          <div class="col-12 col-lg-6">
+            <a href="{% url 'posts:detail' post.pk %}" class="text-decoration-none text-body">
+              <div class="rg-card">
+                {# ─ 왼쪽 영역 ─ #}
+                <div class="rg-left">
+                  <div class="d-flex align-items-center mb-2">
+                    <span class="rg-initial-avatar">
+                      {{ post.author.nickname|default:post.author.username|first }}
+                    </span>
+                    <div class="ms-2">
+                      <div class="small text-muted">
+                        수요 · {{ post.get_usage_display }}
+                      </div>
+                      <div class="fw-semibold">
+                        {{ post.author.nickname|default:post.author.username }}
+                      </div>
+                    </div>
+                  </div>
+
+                  {# ✅ 제목은 빼고, 내용만 한 줄 요약해서 표시 #}
+                  <div class="small text-muted">
+                    {{ post.content|default:""|truncatechars:70 }}
+                  </div>
+                </div>
+
+{# 오른쪽 영역 #}
+<div class="rg-right">
+
+  {# 1) 지불 의사 #}
+  <div class="small mb-1 text-success">
+    <span class="fw-semibold">지불 의사:</span>
+    {% if post.demand_price_pref == "무료" %}
+      무료
+    {% elif post.demand_price_pref == "유료" and post.max_budget %}
+      유료 · 최대 {{ post.max_budget|intcomma }}원
+    {% else %}
+      -
+    {% endif %}
   </div>
 
-  <div class="container">
-    {% if demand_posts %}
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
-        {% for p in demand_posts %}
-          <div class="col">
-            <a href="{% url 'posts:detail' p.pk %}" class="text-decoration-none text-reset">
-              <div class="card shadow-sm h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-success">수요</span>
-                    {% if p.demand_price_pref == "유료" and p.max_budget %}
-                      <span class="badge text-bg-light">지불의사: 유료 · 최대 {{ p.max_budget|intcomma }}원</span>
-                    {% elif p.demand_price_pref == "무료" %}
-                      <span class="badge text-bg-light">지불의사: 무료</span>
-                    {% endif %}
-                  </div>
-                  <h5 class="card-title mb-1">{{ p.author.nickname|default:p.author.username }}</h5>
-                  <p class="text-muted small mb-2">
-                    용도: {{ p.usage|default:"-" }} /
-                    건조: {% if p.dry == True %}유{% elif p.dry == False %}무{% else %}-{% endif %} /
-                    포장: {{ p.package|default:"-" }}
-                  </p>
-                  <p class="card-text text-muted mb-0">{{ p.content|default:""|truncatechars:70 }}</p>
-                </div>
+  {# 2) 거리 선호 #}
+  <div class="small mb-1 text-success">
+    <span class="fw-semibold">거리 선호:</span>
+    {% if post.within_5km %}
+      5km 이내만
+    {% else %}
+      5km 제한 없음
+    {% endif %}
+  </div>
+
+  {# 3) 건조 여부 #}
+  <div class="small mb-2 text-success">
+    <span class="fw-semibold">건조 여부:</span>
+    {% if post.dry == True %}
+      건조 커피박 선호
+    {% elif post.dry == False %}
+      생(미건조) 커피박 선호
+    {% else %}
+      상관없음
+    {% endif %}
+  </div>
+
+  <div class="mt-auto d-flex justify-content-end">
+    <!--span class="btn btn-sm btn-outline-success">자세히 보기</span!-->
+  </div>
+</div>
+
               </div>
             </a>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="container text-muted">최근 수요 글이 아직 없습니다.</div>
+      <p class="text-muted mb-0">최근 수요 글이 아직 없습니다.</p>
     {% endif %}
   </div>
 </section>
 
-{# ── 여기서부터 “커피 뉴스” 섹션 ── #}
-<hr class="my-5">
 
-<section class="py-4" style="background:#fffbe6;">
+{# === 커피를 스마트하게 활용하는 방법 (가이드 미리보기) === #}
+<hr class="my-5">
+<section class="py-4 rg-section-white">
   <div class="container">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <h2 class="h3 mb-0">커피 뉴스 <span class="ms-1">›</span></h2>
+      <h2 class="rg-sec-title mb-0">
+        <a href="{% url 'guides:list' %}">커피를 스마트하게 활용하는 방법 ›</a>
+      </h2>
+      <!--a class="btn btn-outline-success btn-sm" href="{% url 'guides:list' %}">전체 보기</a!-->
+    </div>
+
+    {% if guides %}
+      <div class="rg-hscroll">
+        {% for g in guides %}
+          <a class="rg-guide-card" href="{% url 'guides:detail' g.pk %}">
+            <div class="rg-guide-thumb"
+                 style="{% if g.thumbnail %}background-image:url('{{ g.thumbnail.url }}'){% else %}background:#e8efe8{% endif %};">
+            </div>
+            <div class="rg-guide-body">
+              <div class="rg-guide-title">
+                <b>{{ g.author.nickname|default:g.author.username }}</b>의 {{ g.title }}
+              </div>
+
+              <div class="rg-steps">
+                {% for s in g.steps.all|slice:":6" %}
+                  <span class="rg-step-dot" title="{{ s.title }}">
+                    {% if s.icon %}{{ s.icon }}{% else %}{{ forloop.counter }}{% endif %}
+                  </span>
+                {% endfor %}
+              </div>
+
+              <div class="rg-guide-cta">이렇게 재활용하기</div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">아직 등록된 가이드가 없어요.</p>
+    {% endif %}
+  </div>
+</section>
+
+{# === 커피 뉴스 === #}
+<hr class="my-5">
+<section class="py-4 rg-section-white">
+  <div class="container">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="rg-sec-title mb-0"><a href="#">커피 뉴스 ›</a></h2>
     </div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
       {% for n in news_items %}
-      <div class="col">
-        <a class="rg-news-card" href="{{ n.url }}" target="_blank" rel="noopener noreferrer">
-          <div class="rg-news-thumb"
-               style="background-image:url('{% static n.img %}');"></div>
-          <div class="rg-news-body">
-            <p class="rg-news-title">{{ n.title }}</p>
-            <div class="rg-news-meta">
-              {{ n.date }}
-              <span class="rg-news-arrow">→</span>
+        <div class="col">
+          <a class="rg-news-card" href="{{ n.url }}" target="_blank" rel="noopener noreferrer">
+            <div class="rg-news-thumb" style="background-image:url('{% static n.img %}');"></div>
+            <div class="rg-news-body">
+              <p class="rg-news-title">{{ n.title }}</p>
+              <div class="rg-news-meta">
+                {{ n.date }}
+                <span class="rg-news-arrow">→</span>
+              </div>
             </div>
-          </div>
-        </a>
-      </div>
+          </a>
+        </div>
       {% endfor %}
     </div>
   </div>

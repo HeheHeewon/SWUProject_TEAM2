@@ -39,26 +39,36 @@
             <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">HOME</a>
           </li>
           {% with u=request.GET.usage %}
-            <li class="nav-item">
-              <a class="nav-link {% if u == '원예' %}active{% endif %}"
-                 href="{% url 'posts:list' %}?usage={{ '원예'|urlencode }}">원예용</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if u == '퇴비' %}active{% endif %}"
-                 href="{% url 'posts:list' %}?usage={{ '퇴비'|urlencode }}">퇴비용</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if u == '공예' %}active{% endif %}"
-                 href="{% url 'posts:list' %}?usage={{ '공예'|urlencode }}">공예용</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if u == '연구/실험' %}active{% endif %}"
-                 href="{% url 'posts:list' %}?usage={{ '연구/실험'|urlencode }}">연구/실험</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {% if u == '기타' %}active{% endif %}"
-                 href="{% url 'posts:list' %}?usage={{ '기타'|urlencode }}">기타</a>
-            </li>
+  <li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=원예">
+    원예용
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=퇴비">
+    퇴비용
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=공예">
+    공예용
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=연구/실험">
+    연구/실험
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=기타">
+    기타
+  </a>
+</li>
           {% endwith %}
         </ul>
 
@@ -69,17 +79,20 @@
               <!-- 파랑: 상품 등록(공급글) / 초록: 구매 등록(수요글) -->
             <a class="btn btn-primary btn-sm" href="{% url 'posts:supply_new' %}">판매 등록하기</a>
             <a class="btn btn-success btn-sm" href="{% url 'posts:demand_new' %}">구매 등록하기</a>
-            <a class="btn btn-outline-secondary btn-sm" href="{% url 'cart:cart_detail' %}">장바구니</a>
-            <!--a class="btn btn-outline-secondary btn-sm" href="{% url 'accounts:mypage' %}">마이페이지</a!-->
+            <!--a class="btn btn-outline-secondary btn-sm" href="{% url 'cart:cart_detail' %}">장바구니</a!-->
+
+            {# ✅ 새로 추가: 채팅함 - 기본은 내가 먼저 건 채팅만 보기 #}
+           <a class="btn btn-outline-secondary btn-sm"
+              href="{% url 'chat:inbox' %}?role=buyer">CHAT</a>
+
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'accounts:mypage' %}">MY PAGE</a>
             <!-- 로그아웃 후 현재 위치로 돌아오고 싶으면 get_full_path, 홈으로면 {% url 'home' %} -->
 
-          <a class="btn btn-outline-secondary btn-sm"
-               href="{% url 'accounts:logout' %}?next={{ request.get_full_path }}">로그아웃</a>
+            <a class="btn btn-outline-secondary btn-sm"
+            href="{% url 'accounts:logout' %}?next={% url 'home' %}">로그아웃</a>
+
           {% else %}
-            <!-- 로그인 후 상품등록 페이지로 이동 -->
-            <a class="btn btn-primary btn-sm"
-               href="{% url 'accounts:login' %}?next={% url 'posts:supply_new' %}">판매 등록하기</a>
-            <!-- 로그인 후 현재 페이지로 복귀 -->
+          <!-- 비로그인: 로그인 / 회원가입만 -->
             <a class="btn btn-outline-secondary btn-sm"
                href="{% url 'accounts:login' %}?next={{ request.get_full_path }}">로그인</a>
             <a class="btn btn-secondary btn-sm" href="{% url 'accounts:signup' %}">회원가입</a>

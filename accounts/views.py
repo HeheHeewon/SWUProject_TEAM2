@@ -2,6 +2,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+
+from chat.models import Trade
+from posts.models import Post
 from .forms import SignUpForm, ProfileForm
 from .models import Profile
 
@@ -18,10 +21,42 @@ def signup(request):
         form = SignUpForm()
     return render(request, "accounts/signup.html", {"form": form})
 
+
 @login_required
 def mypage(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
-    return render(request, "accounts/mypage.html", {"profile": profile})
+
+
+    # ✅ 내가 작성한 모든 글 (공급글 + 수요글)
+    my_posts = (
+        Post.objects
+        .filter(author=request.user)
+        .order_by("-created_at")
+    )
+
+    # ✅ 내가 '구매자'로 참여한 거래만 가져오기
+    bought_trades = (
+        Trade.objects
+        .filter(buyer=request.user)
+        .select_related("post", "seller")
+        .order_by("-created_at")
+    )
+
+    # ✅ 내가 '판매자'로 참여한 거래
+    sold_trades = (
+        Trade.objects
+        .filter(seller=request.user)
+        .select_related("post", "buyer")
+        .order_by("-created_at")
+    )
+
+    return render(request, "accounts/mypage.html", {
+        "profile": profile,
+        "my_posts": my_posts,
+        "bought_trades": bought_trades,
+        "sold_trades": sold_trades,
+    })
+
 
 @login_required
 def profile_edit(request):

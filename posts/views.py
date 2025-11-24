@@ -1,7 +1,12 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import render
 from django.urls import reverse_lazy, reverse
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+)
+from django.core.paginator import Paginator  # DualListView 쓰면 사용 가능
+
+from guides.models import Guide
 from .models import Post
 from .forms import DemandForm, SupplyForm
 
@@ -77,7 +82,7 @@ class DemandCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = DemandForm
     template_name = "posts/new_demand.html"
-    success_url = reverse_lazy("posts:list")
+    success_url = reverse_lazy("posts:browse_demand")
 
     def form_valid(self, form):
         form.instance.type = Post.Type.DEMAND
@@ -91,7 +96,7 @@ class SupplyCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = SupplyForm
     template_name = "posts/new_supply.html"
-    success_url = reverse_lazy("posts:list")
+    success_url = reverse_lazy("posts:browse")
 
     def form_valid(self, form):
         form.instance.type = Post.Type.SUPPLY
@@ -135,13 +140,13 @@ class SupplyUpdateView(LoginRequiredMixin, AuthorOnlyMixin, UpdateView):
 class DemandDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
     model = Post
     template_name = "posts/confirm_delete.html"
-    success_url = reverse_lazy("posts:list")
+    success_url = reverse_lazy("home")
 
 
 class SupplyDeleteView(LoginRequiredMixin, AuthorOnlyMixin, DeleteView):
     model = Post
     template_name = "posts/confirm_delete.html"
-    success_url = reverse_lazy("posts:list")
+    success_url = reverse_lazy("home")
 
 # ─────────────────────────────────────────────────────────
 # 홈
@@ -152,12 +157,23 @@ def home(request):
         .select_related("author")
         .order_by("-created_at")[:4]
     )
-    NEWS_COUNT = 4 # 보여지는 뉴스의 개수
+    NEWS_COUNT = 4
     news_items = NEWS_ITEMS[:NEWS_COUNT]
+
+    guides = (
+        Guide.objects.filter(is_published=True)
+        .select_related("author")
+        .prefetch_related("steps")[:4]
+    )
+
     return render(
         request,
         "home.html",
-        {"demand_posts": demand_posts, "news_items": news_items},
+        {
+            "demand_posts": demand_posts,
+            "news_items": news_items,
+            "guides": guides,
+        },
     )
 
 # ─────────────────────────────────────────────────────────
@@ -190,7 +206,7 @@ class SupplyOnlyListView(ListView):
 class DemandOnlyListView(ListView):
     """
     수요글만 모아서 보여주는 전용 목록.
-    템플릿은 posts/list.html 공용을 쓰고, only_demand 플래그로 카드 모양 분기.
+    usage(퇴비/공예용/연구/실험/기타) GET 파라미터로도 필터.
     """
     model = Post
     template_name = "posts/list.html"
@@ -198,28 +214,30 @@ class DemandOnlyListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return (
+        qs = (
             Post.objects.filter(type=Post.Type.DEMAND)
             .select_related("author")
             .order_by("-created_at")
         )
 
+        usage = self.request.GET.get("usage")
+        if usage:
+            qs = qs.filter(usage=usage)
+
+        return qs
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["page_title"] = "이런 커피를 찾아요!"
         ctx["only_demand"] = True
+        ctx["current_usage"] = self.request.GET.get("usage", "")
         return ctx
 
-
-# views.py
-from django.core.paginator import Paginator
-from django.views.generic import TemplateView
-# ... (기존 import 그대로)
 
 class DualListView(TemplateView):
     """
     좌측: 수요글, 우측: 공급글을 한 화면에서 동시 표기.
-    각각 별도 페이지네이션(page_demand, page_supply 사용).
+    (지금은 간단 버전 – 필요하면 Paginator로 양쪽 따로 페이지네이션도 가능)
     """
     template_name = "posts/list_dual.html"
 
@@ -228,11 +246,12 @@ class DualListView(TemplateView):
         ctx["page_title"] = "게시글"
         ctx["demand_posts"] = (
             Post.objects.filter(type=Post.Type.DEMAND)
-            .select_related("author").order_by("-created_at")
+            .select_related("author")
+            .order_by("-created_at")
         )
         ctx["supply_posts"] = (
             Post.objects.filter(type=Post.Type.SUPPLY)
-            .select_related("author").order_by("-created_at")
+            .select_related("author")
+            .order_by("-created_at")
         )
         return ctx
-
