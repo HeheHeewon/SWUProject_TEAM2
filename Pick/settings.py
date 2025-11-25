@@ -27,7 +27,7 @@ SECRET_KEY = env("SECRET_KEY")                 # .env에서 필수
 DEBUG = env.bool("DEBUG", default=True)        # .env에 없으면 True
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'cart',
     'posts',
-    'guides',  # 또는 "guides.apps.GuidesConfig"
+    'guides',
     'chat',
 ]
 
