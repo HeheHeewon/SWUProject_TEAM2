@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+{% load static %}
+{% load humanize %}
+<html>
+<head>
+    <title>마이페이지</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="mypage-section">
+        <h1 class="title">{{ request.user.username }} 님의 마이페이지</h1>
+
+        {# ───── 기본 정보 ───── #}
+        <h2 class="subtitle">기본 정보</h2>
+        <p>아이디: {{ request.user.username }}</p>
+        <p>이메일: {{ request.user.email }}</p>
+
+        {# ───── 프로필 정보 ───── #}
+        <h2 class="subtitle">프로필 정보 (Profile 모델)</h2>
+        <p>전화번호: {{ profile.phone_number|default:"미등록" }}</p>
+        <p>주소: {{ profile.address|default:"미등록" }}</p>
+        <p>누적 거래 횟수: {{ profile.total_transactions }}회</p>
+
+        <div style="margin-top: 20px;">
+            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-secondary">
+                프로필 수정하기
+            </a>
+        </div>
+
+        {# ───── 내가 작성한 글 목록 ───── #}
+        <div style="margin-top: 40px;">
+            <h2 class="subtitle">내가 작성한 글</h2>
+            {% if my_posts %}
+                <ul>
+                    {% for p in my_posts %}
+                        <li style="margin-bottom: 6px;">
+                            [{{ p.get_type_display }}]
+                            <a href="{% url 'posts:detail' p.pk %}">
+                                {{ p.title }}
+                            </a>
+                            <span class="text-muted">
+                                · {{ p.created_at|date:"Y-m-d" }}
+                            </span>
+
+                            {# 글 수정 / 삭제 버튼: 타입에 따라 URL 분기 #}
+                            {% if p.type == "DEMAND" %}
+                                <a href="{% url 'posts:demand_edit' p.pk %}"
+                                   class="btn btn-xs btn-secondary">
+                                    수정
+                                </a>
+                                <a href="{% url 'posts:demand_delete' p.pk %}"
+                                   class="btn btn-xs btn-cancel">
+                                    삭제
+                                </a>
+                            {% elif p.type == "SUPPLY" %}
+                                <a href="{% url 'posts:supply_edit' p.pk %}"
+                                   class="btn btn-xs btn-secondary">
+                                    수정
+                                </a>
+                                <a href="{% url 'posts:supply_delete' p.pk %}"
+                                   class="btn btn-xs btn-cancel">
+                                    삭제
+                                </a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">아직 작성한 글이 없습니다.</p>
+            {% endif %}
+        </div>
+
+        {# ───── 내가 구매한 거래 내역 ───── #}
+        <div style="margin-top: 40px;">
+            <h2 class="subtitle">내가 구매한 거래 내역</h2>
+            {% if bought_trades %}
+                <ul>
+                    {% for t in bought_trades %}
+                        <li style="margin-bottom: 6px;">
+                            <strong>{{ t.post.title }}</strong>
+                            <span class="text-muted">
+                                — 판매자: {{ t.seller.username }}
+                                / 완료일: {{ t.created_at|date:"Y-m-d H:i" }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">아직 구매 확정된 거래 내역이 없습니다.</p>
+            {% endif %}
+        </div>
+
+        {# ───── 내가 판매한 거래 내역 ───── #}
+        <div style="margin-top: 40px;">
+            <h2 class="subtitle">내가 판매한 거래 내역</h2>
+            {% if sold_trades %}
+                <ul>
+                    {% for t in sold_trades %}
+                        <li style="margin-bottom: 6px;">
+                            <strong>{{ t.post.title }}</strong>
+                            <span class="text-muted">
+                                — 구매자: {{ t.buyer.username }}
+                                / 완료일: {{ t.created_at|date:"Y-m-d H:i" }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">아직 판매 확정된 거래 내역이 없습니다.</p>
+            {% endif %}
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="{% url 'accounts:logout' %}" class="btn btn-cancel">로그아웃</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,191 @@
+/* --- Base Styles & Typography (메인 시안 톤으로 강화) --- */
+@import url('https://fonts.com/css2?family=Noto+Sans+KR:wght@333;400;500;700&display=swap');
+
+:root {
+    --primary-color: #4CAF50; /* 메인 시안의 녹색 (등록 버튼 색상) */
+    --secondary-color: #8BC34A; /* 연두색 (보조 포인트) */
+    --background-color: #F8FFF7; /* 전체 배경색 (시안의 밝은 톤) */
+    --card-background: #fff;
+    --text-dark: #333;
+    --text-light: #666;
+    --border-color: #e0e0e0;
+    --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05); /* 그림자 강조 */
+    --highlight-bg: #E8F5E9; /* 섹션 하이라이트 배경 (연한 녹색) */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: var(--background-color);
+    min-height: 100vh;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* --- Buttons (시안 스타일 적용) --- */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px !important;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    border: none !important;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.btn-primary, .btn.btn-primary { /* 메인 녹색 */
+    background-color: var(--primary-color) !important;
+    color: var(--white) !important;
+}
+
+.btn-primary:hover, .btn.btn-primary:hover {
+    background-color: #43A047 !important; 
+}
+
+.btn-secondary, .btn.btn-secondary { /* 보조 버튼 */
+    background-color: var(--secondary-color) !important;
+    color: var(--white) !important;
+}
+
+.btn-secondary:hover, .btn.btn-secondary:hover {
+    background-color: #AED581 !important;
+}
+
+.btn-cancel, .btn.btn-cancel { /* 취소 버튼 */
+    background-color: var(--border-color) !important;
+    color: var(--text-dark) !important;
+}
+
+/* --- Card Sections (배경 및 그림자 통일) --- */
+.mypage-section, .cart-page, .auth-form, .edit-form, .main-content-card {
+    background-color: var(--card-background) !important;
+    padding: 40px !important;
+    border-radius: 12px !important;
+    box-shadow: var(--box-shadow) !important;
+    margin-top: 30px !important;
+    margin-bottom: 30px !important;
+    max-width: 100%;
+}
+
+.auth-form, .edit-form {
+    max-width: 450px; 
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 폼 필드 스타일 (강화) */
+.auth-form input[type="text"],
+.auth-form input[type="password"],
+.auth-form input[type="tel"],
+.edit-form input[type="text"],
+.edit-form input[type="tel"],
+.auth-form textarea,
+.edit-form textarea {
+    border: 1px solid #C8E6C9; /* 연한 녹색 테두리 */
+    box-shadow: none;
+    transition: border-color 0.3s;
+}
+
+.auth-form input:focus, .edit-form input:focus {
+    border-color: var(--primary-color) !important; /* 포커스 시 강조 */
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25) !important;
+    outline: none;
+}
+
+/* --- MyPage / Cart Subtitles --- */
+.mypage-section .title, .cart-page .title {
+    color: var(--primary-color);
+    border-bottom: 2px solid #C8E6C9; 
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.mypage-section .subtitle {
+    border-left: 4px solid var(--primary-color);
+    padding-left: 15px;
+}
+
+/* --- 메인 페이지 섹션 (시안) --- */
+.main-banner-section {
+    background-color: var(--background-color);
+    padding: 60px 0;
+    text-align: center;
+}
+
+.main-banner-content {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+}
+
+.sub-banner-card {
+    background-color: #333; /* 임시 배경색 */
+    color: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- 기타 섹션 스타일 --- */
+.highlight-section {
+    background-color: var(--highlight-bg); /* 연한 녹색 배경 */
+    padding: 40px 0;
+    margin-top: -30px; /* 위 카드 섹션과 겹치지 않도록 */
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    border-bottom: 2px solid var(--primary-color);
+    display: inline-block;
+    padding-bottom: 5px;
+    margin-bottom: 30px;
+}
+
+/* --- Footer --- */
+.main-footer {
+    background-color: #4CAF50; /* 푸터를 녹색으로 통일 */
+    color: var(--white);
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto; 
+}
+/* ... (나머지 반응형 스타일 유지) ... */

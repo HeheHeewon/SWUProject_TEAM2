@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <title>프로필 수정</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="edit-form">
+        <h1>프로필 정보 수정</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">저장하기</button>
+        </form>
+
+        <p style="margin-top: 20px; text-align: center;">
+            <a href="{% url 'accounts:mypage' %}">마이페이지로 돌아가기</a>
+        </p>
+    </div>
+</body>
+</html>

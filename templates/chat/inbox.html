@@ -1,0 +1,135 @@
+{# templates/chat/inbox.html #}
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}채팅함{% endblock %}
+
+{% block content %}
+<div class="container-xxl py-4">
+
+  {# 상단 제목 + 탭(판매자/구매자/제안자/받은 제안) #}
+  <div class="rg-toprow mb-3">
+    <h1 class="rg-page-title mb-0">채팅함</h1>
+
+    <div class="chat-filter-group">
+      <div class="btn-group rg-chat-tab-group" role="group">
+
+        <a href="{% url 'chat:inbox' %}?role=seller"
+           class="btn btn-sm rg-chat-tab-btn
+                  {% if role == 'seller' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+          판매자
+        </a>
+
+        <a href="{% url 'chat:inbox' %}?role=buyer"
+           class="btn btn-sm rg-chat-tab-btn
+                  {% if role == 'buyer' %}btn-success{% else %}btn-outline-success{% endif %}">
+          구매자
+        </a>
+
+        <a href="{% url 'chat:inbox' %}?role=proposer"
+           class="btn btn-sm rg-chat-tab-btn
+                  {% if role == 'proposer' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+          제안자
+        </a>
+
+        <a href="{% url 'chat:inbox' %}?role=receiver"
+           class="btn btn-sm rg-chat-tab-btn
+                  {% if role == 'receiver' %}btn-info{% else %}btn-outline-info{% endif %}">
+          받은 제안
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  {% if conversations %}
+    {% for conv in conversations %}
+      {# 🔹 수요/공급 카드와 같은 구조: rg-card + rg-left/rg-right #}
+      <div class="rg-card chat-list-card">
+
+        {# 왼쪽: 글 정보 + 내 역할 #}
+        <div class="rg-left d-flex flex-column justify-content-center">
+          <div class="small text-muted mb-1">
+            [{{ conv.post.get_type_display }}] {{ conv.post.title }}
+          </div>
+
+          <div>
+            {% if conv.post.type == "SUPPLY" and conv.seller == request.user %}
+              <span class="badge bg-primary me-1">판매자</span>
+              <span class="small">
+                구매 문의 보낸 사람:
+                {{ conv.buyer.nickname|default:conv.buyer.username }}
+              </span>
+
+            {% elif conv.post.type == "SUPPLY" and conv.buyer == request.user %}
+              <span class="badge bg-success me-1">구매자</span>
+              <span class="small">
+                판매자: {{ conv.seller.nickname|default:conv.seller.username }}
+              </span>
+
+            {% elif conv.post.type == "DEMAND" and conv.seller == request.user %}
+              <span class="badge bg-info text-dark me-1">받은 제안</span>
+              <span class="small">
+                제안자: {{ conv.buyer.nickname|default:conv.buyer.username }}
+              </span>
+
+            {% elif conv.post.type == "DEMAND" and conv.buyer == request.user %}
+              <span class="badge bg-warning text-dark me-1">제안자</span>
+              <span class="small">
+                글쓴이: {{ conv.seller.nickname|default:conv.seller.username }}
+              </span>
+            {% endif %}
+          </div>
+
+          {# 🔥 최근 활동 + 새 메시지 표시 (DB에서 has_unread 넘겨받음) #}
+          <div class="small text-muted mt-1 d-flex align-items-center gap-2">
+            <span>
+              최근 활동:
+              {{ conv.last_message_at|default:conv.created_at|naturaltime }}
+            </span>
+
+            {% if conv.has_unread %}
+              <span class="badge bg-danger-subtle text-danger fw-semibold">
+                새 메시지
+              </span>
+            {% endif %}
+          </div>
+        </div>
+
+        {# 오른쪽: 채팅방 들어가기 버튼 #}
+        <div class="rg-right d-flex flex-column justify-content-center align-items-end">
+          <a href="{% url 'chat:room' conv.pk %}"
+             class="btn btn-outline-success btn-sm">
+            채팅방 들어가기
+          </a>
+        </div>
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-muted">진행 중인 채팅이 없습니다.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+  // 뒤로가기(bfcache)로 복원된 경우, 자동 새로고침해서 "새 메시지" 뱃지 상태 맞추기
+  window.addEventListener('pageshow', function (event) {
+    var navEntries = (performance.getEntriesByType
+                      ? performance.getEntriesByType('navigation')
+                      : null);
+    var isBackForward = false;
+
+    if (navEntries && navEntries.length > 0) {
+      // type: "navigate" | "reload" | "back_forward"
+      isBackForward = navEntries[0].type === 'back_forward';
+    }
+
+    if (event.persisted || isBackForward) {
+      window.location.reload();
+    }
+  });
+</script>
+{% endblock %}
+

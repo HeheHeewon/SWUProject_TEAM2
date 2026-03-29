@@ -1,0 +1,126 @@
+<!doctype html>
+{% load static %}
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ReGround{% endblock %}</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Pretendard (웹폰트) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
+
+<!-- Custom -->
+<link rel="stylesheet" href="{% static 'css/site.css' %}">
+
+</head>
+<body class="bg-light">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container">
+
+      <a class="navbar-brand fw-semibold" href="{% url 'home' %}">
+       <img src="{% static 'img/logo-reground.png' %}" height="22" class="me-2 align-text-bottom" alt="ReGround">
+       <span class="brand-text visually-hidden">ReGround</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+              aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+        <!-- Left: 카테고리 -->
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">HOME</a>
+          </li>
+          {% with u=request.GET.usage %}
+  <li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=원예">
+    원예용
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=퇴비">
+    퇴비용
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=공예">
+    공예용
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=연구/실험">
+    연구/실험
+  </a>
+</li>
+<li class="nav-item">
+  <a class="nav-link"
+     href="{% url 'posts:browse_demand' %}?usage=기타">
+    기타
+  </a>
+</li>
+          {% endwith %}
+        </ul>
+
+        <!-- Right: 유저 액션 -->
+        <div class="d-flex align-items-center gap-2">
+          {% if request.user.is_authenticated %}
+
+              <!-- 파랑: 상품 등록(공급글) / 초록: 구매 등록(수요글) -->
+            <a class="btn btn-primary btn-sm" href="{% url 'posts:supply_new' %}">판매 등록하기</a>
+            <a class="btn btn-success btn-sm" href="{% url 'posts:demand_new' %}">구매 등록하기</a>
+            <!--a class="btn btn-outline-secondary btn-sm" href="{% url 'cart:cart_detail' %}">장바구니</a!-->
+
+            {# ✅ 새로 추가: 채팅함 - 기본은 내가 먼저 건 채팅만 보기 #}
+           <a class="btn btn-outline-secondary btn-sm"
+              href="{% url 'chat:inbox' %}?role=buyer">CHAT</a>
+
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'accounts:mypage' %}">MY PAGE</a>
+            <!-- 로그아웃 후 현재 위치로 돌아오고 싶으면 get_full_path, 홈으로면 {% url 'home' %} -->
+
+            <a class="btn btn-outline-secondary btn-sm"
+            href="{% url 'accounts:logout' %}?next={% url 'home' %}">로그아웃</a>
+
+          {% else %}
+          <!-- 비로그인: 로그인 / 회원가입만 -->
+            <a class="btn btn-outline-secondary btn-sm"
+               href="{% url 'accounts:login' %}?next={{ request.get_full_path }}">로그인</a>
+            <a class="btn btn-secondary btn-sm" href="{% url 'accounts:signup' %}">회원가입</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  <div class="container mt-3">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Page content -->
+  <main class="container py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block footer %}{% endblock %}
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

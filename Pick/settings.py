@@ -27,7 +27,7 @@ SECRET_KEY = env("SECRET_KEY")                 # .env에서 필수
 DEBUG = env.bool("DEBUG", default=True)        # .env에 없으면 True
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -38,7 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
+    'widget_tweaks',
     'accounts',
+    'cart',
+    'posts',
+    'guides',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -56,7 +62,7 @@ ROOT_URLCONF = 'Pick.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [BASE_DIR / "templates"],  # ✅ 전역 templates 폴더 사용
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,21 +111,36 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
+AUTH_USER_MODEL = "accounts.User"  # 일단 테스트용 추가
+
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]      # ✅ 전역 static 폴더(개발)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Pick/settings.py에 추가
+
+# 회원가입 성공 후 리다이렉트될 URL (로그인 페이지로 설정)
+LOGIN_URL = '/accounts/login/'
+
+# 로그인 성공 후 리다이렉트될 URL (마이페이지로 설정)
+LOGIN_REDIRECT_URL = '/accounts/mypage/'
+
+# 로그아웃 후 리다이렉트될 URL (선택 사항, 홈이나 로그인 페이지로 설정)
+LOGOUT_REDIRECT_URL = '/'

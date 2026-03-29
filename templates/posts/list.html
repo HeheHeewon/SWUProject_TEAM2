@@ -1,0 +1,219 @@
+{# templates/posts/list.html #}
+{% extends "base.html" %}
+{% load static humanize %}
+
+{% block title %}{{ page_title|default:"게시글" }}{% endblock %}
+
+{% block content %}
+<div class="container-xxl py-4">
+
+  {# 상단 큰 탭 (수요 / 공급) #}
+  <div class="rg-toprow">
+    <a href="{% url 'posts:browse_demand' %}"
+       class="rg-toplink {% if only_demand %}is-active{% endif %}">
+      이런 커피를 찾아요!
+    </a>
+
+    <a href="{% url 'posts:browse' %}"
+       class="rg-toplink {% if only_supply %}is-active{% endif %}">
+      판매자 상품 둘러보기
+    </a>
+  </div>
+
+  {# 각 ListView의 context 이름 호환 #}
+  {% with items=posts|default:object_list %}
+    {% for post in items %}
+
+      {# -------------------------------------------------- #}
+      {# 1) 공급(SUPPLY) 목록 — 판매자 상품 둘러보기 #}
+      {# -------------------------------------------------- #}
+      {% if only_supply %}
+      <div class="rg-card">
+
+        <div class="rg-left">
+          <div class="d-flex align-items-center gap-2 mb-2">
+
+            {% if post.author and post.author.avatar %}
+              <img src="{{ post.author.avatar.url }}" class="rg-avatar-48" alt="">
+            {% else %}
+              {% with nm=post.author.nickname|default:post.author.username %}
+                <span class="rg-initial-avatar">{{ nm|slice:":1"|upper }}</span>
+              {% endwith %}
+            {% endif %}
+
+            <div class="fw-bold">
+              {{ post.author.nickname|default:post.author.username }}
+            </div>
+          </div>
+
+          <div class="text-muted small">
+            {{ post.content|default:""|truncatechars:90 }}
+          </div>
+        </div>
+
+        <div class="rg-right">
+
+          <div class="rg-meta-row">
+            <span class="rg-meta-label">판매가:</span>
+            <span class="rg-meta-text">
+              {% if post.price_type == "무료" %}
+                무료
+              {% else %}
+                {{ post.price|default:0|intcomma }} 원
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="rg-meta-row">
+            <span class="rg-meta-label">거래방식:</span>
+            <span class="rg-meta-text">
+              {% if post.conditions_list %}
+                {{ post.conditions_list|join:", " }}
+              {% else %}
+                -
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="mt-auto d-flex justify-content-end">
+            {% if post.has_trade %}
+              <button class="btn btn-sm btn-secondary" disabled>
+                거래 완료
+              </button>
+            {% else %}
+              {% if request.user.is_authenticated and request.user != post.author %}
+                <a class="btn btn-sm btn-outline-success"
+                   href="{% url 'chat:start' post.pk %}">
+                  거래하기
+                </a>
+              {% endif %}
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      {# -------------------------------------------------- #}
+      {# 2) 수요(DEMAND) 목록 — 이런 커피를 찾아요! #}
+      {# -------------------------------------------------- #}
+      {% elif only_demand %}
+      <div class="rg-card">
+
+        <div class="rg-left">
+          <div class="d-flex align-items-center gap-2 mb-2">
+
+            {% if post.author and post.author.avatar %}
+              <img src="{{ post.author.avatar.url }}" class="rg-avatar-48" alt="">
+            {% else %}
+              {% with nm=post.author.nickname|default:post.author.username %}
+                <span class="rg-initial-avatar">{{ nm|slice:":1"|upper }}</span>
+              {% endwith %}
+            {% endif %}
+
+            <div class="fw-bold">
+              {{ post.author.nickname|default:post.author.username }}
+              {% if post.get_usage_display %}
+                <span class="text-muted"> | {{ post.get_usage_display }} 수요자</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="text-muted small">
+            {{ post.content|default:""|linebreaksbr }}
+          </div>
+        </div>
+
+        <div class="rg-right">
+
+          <div class="rg-meta-row">
+            <span class="rg-meta-label">지불 의사:</span>
+            <span class="rg-meta-text">
+              {% if post.demand_price_pref == "무료" %}
+                무료
+              {% elif post.demand_price_pref == "유료" and post.max_budget %}
+                유료 · 최대 {{ post.max_budget|intcomma }}원
+              {% else %}
+                -
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="rg-meta-row">
+            <span class="rg-meta-label">거리 선호:</span>
+            <span class="rg-meta-text">
+              {% if post.within_5km %}
+                5km 이내만
+              {% else %}
+                5km 제한 없음
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="rg-meta-row">
+            <span class="rg-meta-label">건조 여부:</span>
+            <span class="rg-meta-text">
+              {% if post.dry == True %}
+                건조 커피박 선호
+              {% elif post.dry == False %}
+                생(미건조) 커피박 선호
+              {% else %}
+                상관없음
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="mt-auto d-flex justify-content-end">
+            {% if post.has_trade %}
+              <button class="btn btn-sm btn-secondary" disabled>
+                거래 완료
+              </button>
+            {% else %}
+              {% if request.user.is_authenticated and request.user != post.author %}
+                  <a class="btn btn-sm btn-outline-success"
+                     href="{% url 'chat:suggest_pick_supply' post.pk %}">
+                     제안하기
+                  </a>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      {% else %}
+      {# -------------------------------------------------- #}
+      {# 3) 기본 카드(타입 분기 없이 사용하는 경우) #}
+      {# -------------------------------------------------- #}
+        {% include "includes/_post_card.html" with post=post %}
+      {% endif %}
+
+    {% empty %}
+      <div class="text-muted">게시물이 없습니다.</div>
+    {% endfor %}
+  {% endwith %}
+
+  {# 페이지네이션 #}
+  {% if is_paginated %}
+    <nav class="mt-3">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">이전</a>
+          </li>
+        {% endif %}
+        <li class="page-item disabled">
+          <span class="page-link">
+            {{ page_obj.number }}/{{ page_obj.paginator.num_pages }}
+          </span>
+        </li>
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">다음</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

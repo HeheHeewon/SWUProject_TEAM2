@@ -1,23 +1,37 @@
-"""
-URL configuration for Pick project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+# Pick/urls.py
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include, reverse_lazy
+from django.views.generic import TemplateView, RedirectView  # 홈(랜딩)용
+from django.contrib.auth import views as auth_views    # 커스텀 로그인 템플릿용
+from posts import views as post_views   # ✅ 추가
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+from posts.views import home
 
 urlpatterns = [
+    # 홈(랜딩) — 최상단에 노출
+    # path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('', post_views.home, name='home'),
+
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),  # accounts/urls.py가 있어야 함
+    # 계정(여기 안에 login/logout/password change/reset 전부 포함됨)
+    path('accounts/', include('accounts.urls', namespace='accounts')),
+
+    # 선택: 루트 단축 경로(/login, /signup, /mypage → /accounts/...)
+    path('login/', RedirectView.as_view(url=reverse_lazy('accounts:login'), permanent=False)),
+    path('signup/', RedirectView.as_view(url=reverse_lazy('accounts:signup'), permanent=False)),
+    path('mypage/', RedirectView.as_view(url=reverse_lazy('accounts:mypage'), permanent=False)),
+
+    path('cart/', include('cart.urls')),  # accounts/urls.py가 있어야 함
+    path('posts/', include('posts.urls', namespace='posts')),
+
+    path("guides/", include("guides.urls", namespace="guides")),
+    path("chat/", include("chat.urls", namespace="chat")),
 ]
+
+# 👇 이 부분 새로 추가
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

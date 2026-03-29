@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ object.title }} | ReGround{% endblock %}
+{% block content %}
+<div class="container-xxl py-4">
+  <h1 class="rg-sec-title mb-2">{{ object.title }}</h1>
+  <div class="text-muted mb-3">
+    작성자: {{ object.author.nickname|default:object.author.username }} · {{ object.created_at|date:"Y.m.d" }}
+  </div>
+
+  {# ★ 썸네일 부분 제거 완료 #}
+
+  {% if object.summary %}
+    <p class="lead">{{ object.summary }}</p>
+    <hr>
+  {% endif %}
+
+  <ol class="list-group list-group-numbered mb-4">
+    {% for s in object.steps.all %}
+      <li class="list-group-item d-flex align-items-center gap-2">
+        <div>
+          <div class="fw-bold">{{ s.title }}</div>
+          {% if s.note %}
+            <div class="text-muted small">{{ s.note }}</div>
+          {% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted">등록된 단계가 없습니다.</li>
+    {% endfor %}
+  </ol>
+
+  <a href="{% url 'guides:list' %}" class="btn btn-outline-secondary">목록으로</a>
+</div>
+{% endblock %}

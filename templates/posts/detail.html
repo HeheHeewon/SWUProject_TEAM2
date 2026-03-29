@@ -1,0 +1,148 @@
+{# templates/posts/detail.html #}
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}{{ object.title }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="h5 mb-2">[{{ object.get_type_display }}] {{ object.title }}</h1>
+
+    <div class="text-muted small mb-3">
+      작성자: {{ object.author.nickname|default:object.author.username }} ·
+      작성일: {{ object.created_at|date:"Y-m-d H:i" }}
+    </div>
+
+    {# 공통 정보 #}
+    <dl class="row">
+      <dt class="col-sm-2">거래 장소</dt>
+      <dd class="col-sm-10">
+        {% if object.place_name %}
+          {{ object.place_name }}
+        {% elif object.address %}
+          {{ object.address }}
+        {% else %}
+          -
+        {% endif %}
+      </dd>
+
+      {% if object.conditions %}
+        <dt class="col-sm-2">거래/수거 조건</dt>
+        <dd class="col-sm-10">{{ object.conditions }}</dd>
+      {% endif %}
+    </dl>
+
+    {# 타입별 상세 정보 #}
+    {% if object.type == 'DEMAND' %}
+      <h2 class="h6 mt-4">수요 상세</h2>
+      <dl class="row">
+        <dt class="col-sm-2">지불 의사</dt>
+        <dd class="col-sm-10">
+          {{ object.demand_price_pref|default:"-" }}
+          {% if object.demand_price_pref == "유료" and object.max_budget %}
+            · 최대 {{ object.max_budget|intcomma }}원
+          {% endif %}
+        </dd>
+
+        <dt class="col-sm-2">용도</dt>
+        <dd class="col-sm-10">{{ object.usage|default:"-" }}</dd>
+
+        <dt class="col-sm-2">건조</dt>
+        <dd class="col-sm-10">
+          {% if object.dry == True %}
+            건조됨
+          {% elif object.dry == False %}
+            건조 안 됨
+          {% else %}
+            -
+          {% endif %}
+        </dd>
+
+        <dt class="col-sm-2">포장</dt>
+        <dd class="col-sm-10">{{ object.package|default:"-" }}</dd>
+
+        <dt class="col-sm-2">거리 선호</dt>
+        <dd class="col-sm-10">{{ object.within_5km|yesno:"5km 이내만,5km 제한 없음" }}</dd>
+      </dl>
+
+    {% else %}
+      <h2 class="h6 mt-4">공급 상세</h2>
+      <dl class="row">
+        <dt class="col-sm-2">가격</dt>
+        <dd class="col-sm-10">
+          {{ object.price_type }}
+          {% if object.price_type == "유료" and object.price %}
+            / {{ object.price|intcomma }}원
+          {% endif %}
+        </dd>
+
+        <dt class="col-sm-2">수량/단위</dt>
+        <dd class="col-sm-10">{{ object.amount|default:"-" }}</dd>
+      </dl>
+    {% endif %}
+
+    {% if object.content %}
+      <hr>
+      <div class="mt-3">{{ object.content|linebreaksbr }}</div>
+    {% endif %}
+
+    <hr class="my-4">
+
+    {# 본인 글일 때: 수정/삭제 버튼 #}
+    {% if request.user.is_authenticated and request.user.id == object.author_id %}
+      {% if object.type == 'DEMAND' %}
+        <a class="btn btn-outline-primary" href="{% url 'posts:demand_edit' object.pk %}">수정</a>
+        <a class="btn btn-outline-danger"  href="{% url 'posts:demand_delete' object.pk %}">삭제</a>
+      {% else %}
+        <a class="btn btn-outline-primary" href="{% url 'posts:supply_edit' object.pk %}">수정</a>
+        <a class="btn btn-outline-danger"  href="{% url 'posts:supply_delete' object.pk %}">삭제</a>
+      {% endif %}
+
+    {# 내 글이 아닐 때: 장바구니 버튼 노출 (공급글만) #}
+    {% elif object.type == 'SUPPLY' %}
+      {% if request.user.is_authenticated %}
+        <!--a class="btn btn-primary"  href="{% url 'cart:cart_add' object.pk %}">장바구니 담기</a!-->
+      {% else %}
+        <!--a class="btn btn-success"
+           href="{% url 'accounts:login' %}?next={% url 'posts:detail' object.pk %}">
+           장바구니 담기
+        </a!-->
+      {% endif %}
+    {% endif %}
+
+    {# 🔥 거래하기 / 거래 완료 버튼 (본인 글이면 숨김) #}
+    {% if request.user.is_authenticated and request.user != object.author %}
+      {% if object.has_trade %}
+        <button class="btn btn-secondary mb-3" disabled>
+          거래 완료
+        </button>
+      {% else %}
+       {% if object.type == "SUPPLY" %}
+          {# 공급글: 채팅 시작 (거래하기) #}
+        <a class="btn btn-success mb-3"
+           href="{% url 'chat:start' object.pk %}">
+          거래하기
+        </a>
+            {% else %}
+          {# 수요글: 내 판매글로 제안하기 화면으로 이동 #}
+          <a class="btn btn-success mb-3"
+             href="{% url 'chat:suggest_pick_supply' object.pk %}">
+            제안하기
+          </a>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+
+    {% if object.type == 'DEMAND' %}
+  <a class="btn btn-link" href="{% url 'posts:browse_demand' %}">
+    목록으로
+  </a>
+{% else %}
+  <a class="btn btn-link" href="{% url 'posts:browse' %}">
+    목록으로
+  </a>
+{% endif %}
+  </div>
+</div>
+{% endblock %}

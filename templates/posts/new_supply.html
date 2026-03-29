@@ -1,0 +1,138 @@
+{# templates/posts/new_supply.html #}
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}상품 등록하기{% endblock %}
+
+{% block content %}
+<div class="container-xxl py-4">
+  <h1 class="fw-bold mb-4" style="color:#2f6e57;">상품 등록하기</h1>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+
+    <!-- 제목 -->
+    <div class="mb-4">
+      <label class="form-label fs-5">제목</label>
+      {# widget_tweaks 사용 중이면 add_class, 아니면 그냥 {{ form.title }} #}
+      {% if form.title|default_if_none:None and form.title.field %}
+        {% if form.title|default_if_none:None and form.title.field.widget.attrs.class %}
+          {{ form.title }}
+        {% else %}
+          {{ form.title|add_class:"form-control" }}
+        {% endif %}
+      {% else %}
+        {{ form.title }}
+      {% endif %}
+      {% for e in form.title.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <!-- 게시글 내용 -->
+    <div class="mb-4">
+      <label class="form-label fs-5">게시글 내용</label>
+      {% if form.content.field.widget.attrs.class %}
+        {{ form.content }}
+      {% else %}
+        {{ form.content|add_class:"form-control" }}
+      {% endif %}
+      {% for e in form.content.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <!-- 판매가 + 거래 방식(무료/유료) -->
+    <div class="row g-3 align-items-end mb-4">
+      <div class="col-md-6">
+        <label class="form-label fs-6">판매가</label>
+        <div class="input-group" id="priceGroup">
+          {% if form.price.field.widget.attrs.class %}
+            {{ form.price }}
+          {% else %}
+            {{ form.price|add_class:"form-control" }}
+          {% endif %}
+          <span class="input-group-text">원</span>
+        </div>
+        {% for e in form.price.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fs-6">지불 방식</label>
+        {% if form.price_type.field.widget.attrs.class %}
+          {{ form.price_type }}
+        {% else %}
+          {{ form.price_type|add_class:"form-select" }}
+        {% endif %}
+        {% for e in form.price_type.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+    </div>
+
+    <!-- 희망 거래방식(직거래/택배) : 다중 선택 체크박스 -->
+    <div class="mb-4">
+      <label class="form-label fs-6">희망 거래방식</label>
+      <div class="rg-checklist">
+        {{ form.conditions }}  {# MultipleChoiceField + CheckboxSelectMultiple 이므로 체크박스 목록으로 렌더됨 #}
+      </div>
+      {% for e in form.conditions.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      <!--  ↓ 만약 드롭다운(다중)으로 바꾸고 싶다면 SupplyForm 위젯을 SelectMultiple로 바꾸고 아래처럼 렌더:
+          {{ form.conditions|add_class:"form-select" }} !-->
+    </div>
+
+    <!-- 거래 장소명/주소 -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <label class="form-label fs-6">거래 장소명</label>
+        {% if form.place_name.field.widget.attrs.class %}
+          {{ form.place_name }}
+        {% else %}
+          {{ form.place_name|add_class:"form-control" }}
+        {% endif %}
+        {% for e in form.place_name.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fs-6">주소</label>
+        {% if form.address.field.widget.attrs.class %}
+          {{ form.address }}
+        {% else %}
+          {{ form.address|add_class:"form-control" }}
+        {% endif %}
+        {% for e in form.address.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+      </div>
+    </div>
+
+    <!-- 수량/단위 -->
+    <div class="mb-5">
+      <label class="form-label fs-6">수량/단위</label>
+      {% if form.amount.field.widget.attrs.class %}
+        {{ form.amount }}
+      {% else %}
+        {{ form.amount|add_class:"form-control" }}
+      {% endif %}
+      {% for e in form.amount.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+    </div>
+
+    <div class="text-end">
+      <button class="btn btn-success btn-lg px-4">등록 완료</button>
+    </div>
+  </form>
+</div>
+
+<style>
+/* 체크박스들을 수평 정렬하고 간격만 살짝 */
+.rg-checklist ul { list-style: none; padding-left: 0; margin: 0; }
+.rg-checklist li { display: inline-flex; align-items: center; gap: .35rem; margin-right: 1rem; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const priceType = document.getElementById('{{ form.price_type.auto_id }}');
+  const priceGroup = document.getElementById('priceGroup');
+
+  function togglePrice(){
+    if (!priceType) return;
+    const val = priceType.value;
+    // 선택지 값이 "무료"/"유료" 이므로 문자열 비교
+    priceGroup.style.display = (val === '무료') ? 'none' : '';
+  }
+  togglePrice();
+  if (priceType) priceType.addEventListener('change', togglePrice);
+});
+</script>
+{% endblock %}
